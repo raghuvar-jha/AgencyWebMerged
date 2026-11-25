@@ -47,8 +47,8 @@
   /* ---------- Typography: fluid scale (min = mobile 360px, max = desktop 1280px+) ---------- */
   --text-*: initial;
 
-  --text-display: clamp(2.5rem, 1.75rem + 3.2vw, 3.75rem);
-  --text-display--line-height: 1.05;
+  --text-display: clamp(2.5rem, 1.75rem + 3.2vw, 4rem);
+  --text-display--line-height: 1.1;
   --text-display--letter-spacing: -0.03em;
   --text-display--font-weight: 800;
 
@@ -56,6 +56,12 @@
   --text-h1--line-height: 1.1;
   --text-h1--letter-spacing: -0.025em;
   --text-h1--font-weight: 800;
+
+  /* Compact display: stat numbers, wordmark */
+  --text-title: 1.75rem;
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.02em;
+  --text-title--font-weight: 800;
 
   --text-h2: clamp(1.75rem, 1.4rem + 1.5vw, 2.25rem);
   --text-h2--line-height: 1.15;
@@ -99,7 +105,8 @@
   --shadow-focus: 0 0 0 3px rgb(91 63 217 / 0.35);
 
   /* ---------- Layout ---------- */
-  --container-site: 72rem; /* max-w-site = 1152px */
+  --container-site: 80rem; /* max-w-site = 1280px incl. gutters (1216 content at px-8) */
+  --container-nav: 87rem; /* max-w-nav = 1392px incl. gutters (1328 content), navbar only */
   --container-article: 42rem; /* max-w-article = 672px, blog/long text */
   --spacing-section: 4rem; /* py-section (mobile) */
   --spacing-section-lg: 6rem; /* md:py-section-lg (desktop) */

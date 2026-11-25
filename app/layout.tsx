@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { Navbar } from "@/components/sections/Navbar";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -22,6 +23,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-IN" className={`${jakarta.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background font-sans text-body text-foreground">
+        <a
+          href="#main"
+          className="sr-only rounded-sm bg-background px-4 py-3 text-small font-semibold text-primary shadow-raised focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
+        >
+          Skip to content
+        </a>
+        <Navbar />
         {children}
       </body>
     </html>

@@ -95,8 +95,9 @@ Sizes are **fluid** (`clamp()`), so a single class works on all screens: no `tex
 
 | Token (`text-*`) | Mobile (360px) | Desktop (≥1280px) | Line-height | Weight | Tracking | Use |
 |---|---|---|---|---|---|---|
-| `text-display` | 40px | 60px | 1.05 | 800 | -0.03em | Home hero h1 only |
+| `text-display` | 40px | 64px | 1.1 | 800 | -0.03em | Home hero h1 only (measured from Hero.png: 71px line pitch at 1440) |
 | `text-h1` | 34px | 48px | 1.1 | 800 | -0.025em | h1 on inner pages |
+| `text-title` | 28px | 28px | 1.15 | 800 | -0.02em | Compact display: hero stat numbers, wordmark (not a heading level) |
 | `text-h2` | 28px | 36px | 1.15 | 700 | -0.02em | Section titles |
 | `text-h3` | 20px | 24px | 1.3 | 700 | -0.01em | Card titles, sub-sections |
 | `text-h4` | 18px | 18px | 1.4 | 600 | -0.005em | Small headings, pricing tier names |
@@ -111,9 +112,9 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 
 ## 4. Spacing & layout
 
-- **Base unit 4px** (Tailwind default spacing). **Allowed steps:** `1 2 3 4 5 6 8 10 12 16 20 24` (4px → 96px). Don't use other values.
+- **Base unit 4px** (Tailwind default spacing). **Allowed steps:** `1 2 3 4 5 6 8 10 12 14 16 20 24` (4px → 96px; half-steps `0.5 1.5 2.5` only inside small components like badges). Don't use other values.
 - **Section padding:** `py-section md:py-section-lg` (64px mobile / 96px desktop). Hero may use `pt-10 pb-section md:pt-16`.
-- **Container:** `mx-auto w-full max-w-site px-5 md:px-8` (1152px max; 20px / 32px gutters). Long-form text: `max-w-article`.
+- **Container:** `mx-auto w-full max-w-site px-5 md:px-8` (`max-w-site` = 1280px incl. gutters → 1216px content on desktop; 20px / 32px gutters). Navbar only: `max-w-nav` (1392px → 1328px content). Long-form text: `max-w-article`.
 - **Breakpoints** (Tailwind defaults): `sm` 640, `md` 768, `lg` 1024, `xl` 1280. Design order: base (360) → `md` → `lg`.
 - **Grids:**
   - Card grids: `grid gap-5 sm:grid-cols-2 lg:grid-cols-3` (services, testimonials, pricing). Case studies: `lg:grid-cols-4` allowed (project.png).
@@ -127,8 +128,8 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 
 | Token | Value | Use |
 |---|---|---|
-| `rounded-sm` | 8px | Inputs, small chips, icon tiles |
-| `rounded-md` | 12px | Buttons, dropdowns |
+| `rounded-sm` | 8px | Buttons (measured ≈8px in Hero.png), inputs, small chips, icon tiles |
+| `rounded-md` | 12px | Dropdowns, menus |
 | `rounded-lg` | 16px | Cards (service, testimonial, stats) |
 | `rounded-xl` | 24px | Section panels (hero stats panel, pre-footer CTA band, pricing cards), images in cards |
 | `rounded-pill` | 9999px | Badges, eyebrow pills, avatars, floating WhatsApp |
@@ -158,7 +159,9 @@ Folder: primitives in `components/ui/`, page sections in `components/sections/`.
 ### 6.1 Button
 Anatomy: `<button>`/`<Link>` → optional leading icon (20px) → label → optional trailing icon (`ArrowRight` 18px). Min height 48px (`h-12`), small size 44px (`h-11`).
 
-Base: `inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md text-body font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed`
+Implemented in `components/ui/Button.tsx` (`Button`, `ButtonLink`, `buttonClasses()`).
+
+Base: `inline-flex shrink-0 items-center justify-center gap-2 rounded-sm font-semibold whitespace-nowrap transition-colors duration-150 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50`
 
 | Variant | Classes | Use |
 |---|---|---|
@@ -169,7 +172,7 @@ Base: `inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md text-b
 | on-ink primary | same as primary | Inside `bg-ink` |
 | on-ink secondary | `border border-ink-muted text-ink-foreground hover:bg-ink-surface` | Inside `bg-ink` |
 
-Sizes: `sm` = `h-11 px-4 text-small`, `md` (default) = above, full-width on mobile forms: `w-full sm:w-auto`.
+Sizes: `sm` = `h-11 px-4 text-small` · `md` (default, navbar CTA) = `h-12 px-6 text-small` · `lg` (hero / mobile menu) = `h-14 px-7 text-body`. Full width: `fullWidth` prop (`w-full`).
 Loading: `<Loader2 className="size-5 animate-spin" aria-hidden />` + label "Sending…".
 
 ### 6.2 Link (inline)
@@ -177,23 +180,29 @@ Loading: `<Loader2 className="size-5 animate-spin" aria-hidden />` + label "Send
 Arrow link ("View case study →"): `inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:gap-2.5 transition-all` with `ArrowRight size-4`. External links get `rel="noopener"` and a visible label, never "click here".
 
 ### 6.3 Navbar
-Anatomy (Hero.png): logo left · nav links centre/right · primary CTA right. Sticky, white.
-- Wrapper: `sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border` (add `shadow-card` after scroll is optional; skip if it needs JS).
-- Inner: container + `flex h-16 items-center justify-between`.
-- Links (desktop `lg:flex gap-8`): `text-small font-medium text-muted hover:text-foreground`, active: `text-primary` + `aria-current="page"`.
-- CTA: Button primary size sm, "Free audit".
-- **Mobile (< lg):** logo · hamburger button (`size-11`, `Menu`/`X` icon, `aria-expanded`, `aria-controls`). Panel: full-width below the bar, `bg-background shadow-raised`, links stacked `py-3 text-h4`, then full-width primary CTA + WhatsApp button. Use `<details>`/`<dialog>` or a tiny client component; close on link click and Esc. Body scroll lock not required.
+Implemented: `components/sections/Navbar.tsx` (Server) + `components/sections/MobileMenu.tsx` (the only client code). Rendered globally in `app/layout.tsx` after a "Skip to content" link. Copy in `lib/content/home.ts` (`navLinks`, `navCta`).
+Anatomy (Hero.png): logo left · links + primary CTA right. No border.
+- Wrapper: `sticky top-0 z-40 bg-surface/70 backdrop-blur-md`. It looks transparent over the hero gradient and turns into a frosted lavender bar on scroll (no JS).
+- Inner: `mx-auto flex h-16 lg:h-24 max-w-nav items-center justify-between px-5 md:px-8`.
+- Logo (`components/ui/Logo.tsx`): mark `size-10 lg:size-12` + wordmark `text-h4 lg:text-title font-extrabold`, `gap-3`, links to `/`. **[PLACEHOLDER] mark until the real logo exists.**
+- Links (`lg:flex`, `gap-10`): `text-small font-medium text-muted hover:text-primary`.
+- CTA: `ButtonLink` md, `ml-12`, "Get Free Audit".
+- **Mobile (< lg):** hamburger `size-11` (`aria-expanded`, `aria-controls`, label toggles Open/Close menu). Panel: `absolute inset-x-0 top-full bg-background shadow-raised border-t`, links `block py-4 text-h4` with dividers, then full-width primary CTA (lg) + WhatsApp button (lg). Closes on Escape (focus returns to the button), outside pointer-down, link click and resize to ≥ lg; locks body scroll while open.
+- Gotcha: `backdrop-blur` makes the header the containing block for `position: fixed` children, so don't put full-screen overlays inside the header.
 
 ### 6.4 Hero
-Anatomy (Hero.png): eyebrow pill → h1 (two-tone) → lead → CTA row (primary + ghost/WhatsApp) → social proof row → media (image + up to 3 floating stat cards).
-- Section: `bg-surface` + container, `grid items-center gap-10 lg:grid-cols-2 pt-10 pb-section md:pt-16`.
-- Eyebrow: Badge (soft) uppercase.
-- h1: `text-display text-foreground` with `<span class="text-primary">` for the outcome phrase.
-- Lead: `text-body-lg text-muted max-w-article`.
-- CTAs: `flex flex-col gap-3 sm:flex-row`: primary "Get my free website audit" + whatsapp "Chat on WhatsApp".
-- Proof: avatar stack (`-space-x-2`, `size-9 rounded-pill ring-2 ring-background`) + 5 stars (`fill-accent text-accent size-4`) + `text-small text-muted` line. **Only with real reviews**; otherwise omit.
-- Media: `next/image` with `priority`, `rounded-xl`, aspect 4/5 on desktop, hidden or 16/10 on mobile. Floating stat cards: `bg-background rounded-lg shadow-card p-4` with icon chip + number `text-h3` + label `text-small text-muted`. On mobile they become a row of 3 under the media (no overlap).
-- No decorative squiggles that need extra images; a single inline SVG accent is fine.
+Implemented: `components/sections/Hero.tsx` + `components/sections/hero/{StatCard,TrustBar,Decorations}.tsx`. Copy in `lib/content/home.ts` (`hero`, `heroStats`, `trustBar`).
+Anatomy (Hero.png): eyebrow pill → two-tone h1 → lead → CTA row (primary + WhatsApp text link) → social proof → media (photo on blobs + 3 stat cards) → trust bar.
+- Section: `relative -mt-16 lg:-mt-24 pt-16 lg:pt-24 overflow-hidden bg-linear-to-br from-surface to-surface-strong/70` (pulled up under the sticky navbar so the gradient runs behind it).
+- Grid: `max-w-site px-5 md:px-8 pt-10 lg:pt-16 grid items-center gap-12 lg:grid-cols-2 lg:gap-8`. Copy is centred below lg and left-aligned at lg.
+- Eyebrow: Badge **eyebrow** variant (§6.13).
+- h1: `mt-8 text-display text-foreground`, second phrase `block text-primary`.
+- Lead: `mt-6 max-w-md text-body-lg text-muted`.
+- CTAs: `mt-10 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8`: `ButtonLink` lg + arrow, then the WhatsApp text link `h-11 text-body font-semibold text-primary` with icon.
+- Social proof: avatars `size-12 rounded-pill ring-2 ring-background -space-x-3` + 5 stars `size-4 fill-accent text-accent` + `text-small text-muted`. **[PLACEHOLDER] until real reviews exist.**
+- Media: photo slot `aspect-4/5 max-w-xs lg:max-w-sm`, with `next/image fill priority object-contain` when `hero.photo.src` is set, otherwise a dashed placeholder panel. Decorations (`HeroBlobs` `fill-primary/10`, `Squiggle`, `Sparkle`) are inline SVG, `aria-hidden`, `lg` only.
+- Stat card (`StatCard`): `rounded-lg bg-background/85 shadow-card`. Below lg: a 3-column grid under the photo, stacked compact (`p-3 sm:p-4`, icon `size-10`, number `text-h4`, label `text-caption`). At lg: `absolute right-0 top-1/2 -translate-y-1/2 w-60 flex-col gap-8`, overlapping the photo; card `flex-row gap-4 px-5 py-8`, icon circle `size-14 bg-surface-strong text-primary`, number `text-title`, label `text-small text-muted whitespace-nowrap`.
+- Trust bar (`TrustBar`): `mt-14` (`pt-14` on the wrapper) then `rounded-xl bg-background/90 px-5 md:px-10 py-8 shadow-card`; title `text-body font-medium text-center`; logos `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`, `h-8 w-auto grayscale` images, or dashed `[CLIENT LOGO n]` slots.
 
 ### 6.5 Section header
 Anatomy: eyebrow (optional) → h2 → intro (optional) → optional right-aligned link on desktop.
@@ -260,7 +269,8 @@ Fields (keep ≤ 4 required): **Name**, **WhatsApp / phone** (+91), **Website UR
 
 ### 6.13 Badge
 `inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-caption uppercase`
-- soft (eyebrow, Hero.png): `bg-surface-strong text-primary`
+- soft: `bg-surface-strong text-primary`
+- eyebrow (hero, Hero.png): `rounded-pill border border-border bg-background/60 px-4 py-2.5 text-caption uppercase text-primary` (≈38px tall)
 - outline: `border border-border bg-background text-muted`
 - highlight ("Most popular"): `bg-accent text-foreground`
 - on ink: `bg-ink-surface text-ink-primary`

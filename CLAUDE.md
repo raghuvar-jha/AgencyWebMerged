@@ -38,7 +38,7 @@ app/                  Routes (App Router). layout.tsx, globals.css (design token
   actions/            Server actions (e.g. submitLead.ts)
 components/ui/        Primitives from DESIGN.md §6 (Button, Badge, Field, Accordion, icons/)
 components/sections/  Page sections (Hero, ServicesGrid, CaseStudies, Testimonials, Pricing, FAQ, LeadForm, Footer)
-lib/                  site.ts (name, NAP, WhatsApp: the only place for business details), db.ts (Prisma client singleton), validation/ (zod schemas), JSON-LD helpers
+lib/                  content/ (typed page copy, e.g. content/home.ts: no copy hard-coded in components), cn.ts (class joiner), site.ts (name, NAP, WhatsApp: the only place for business details), db.ts (Prisma client singleton), validation/ (zod schemas), JSON-LD helpers
 prisma/               schema.prisma + migrations/ (config in prisma.config.ts)
 generated/prisma/     Generated Prisma client (git-ignored; import from "@/generated/prisma/client" only inside lib/db.ts)
 content/              Case studies, services, blog posts, FAQs as typed data or MDX
