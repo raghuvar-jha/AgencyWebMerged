@@ -1,0 +1,414 @@
+# DESIGN.md: Web Merged design system
+
+The single source of truth for all UI on this site. Code tokens live in `app/globals.css` (`@theme`) and use **exactly** the names below. If you need something that isn't here, add it here first (and ask before changing tokens).
+
+The goal of every page is **lead generation**. Primary conversion: **"Get my free website audit"** form. Secondary: **WhatsApp click**. Audience: small-business owners in India, mostly on mid-range Android phones over 4G.
+
+---
+
+## 1. Design principles
+
+1. **One primary CTA per section.** Every section ends in (or contains) one obvious next step. Secondary actions are ghost/link-styled.
+2. **Clarity over decoration.** Lavender surfaces, white cards and violet accents. No gradients-for-the-sake-of-it, no textures, no stock "tech" imagery.
+3. **Mobile first, thumb first.** Design at 360px wide first. Every tappable target is ≥ 44×44px. The WhatsApp button is always within thumb reach.
+4. **Proof beats promises.** Show real work, real numbers and real reviews, and only real ones. Use `[PLACEHOLDER]` until they exist.
+5. **Fast is a feature.** One font family, no heavy JS, images via `next/image`. LCP < 2.5s on 4G.
+6. **Consistent rhythm.** Only the tokens and spacing steps below. Same card, same radius and same shadow everywhere.
+
+---
+
+## 2. Colour system
+
+The violet comes from Hero.png / OfferandPrice.png (#6D4AE0). It was **darkened to #5B3FD9** so white button text and violet links on white both pass AA comfortably (6.65:1). Tailwind's default palette is **removed** (`--color-*: initial`), so only these utilities exist.
+
+### Light (default)
+
+| Token | Hex | Utility examples | Role |
+|---|---|---|---|
+| `background` | `#FFFFFF` | `bg-background` | Page background |
+| `surface` | `#F6F4FF` | `bg-surface` | Lavender section bg (hero, stats, pre-footer) |
+| `surface-strong` | `#EDE9FE` | `bg-surface-strong` | Badges, icon chips, soft fills, selected states |
+| `foreground` | `#14122B` | `text-foreground` | Text-primary, headings |
+| `muted` | `#5B5873` | `text-muted` | Text-muted: body copy, descriptions, captions |
+| `subtle` | `#8B87A8` | `text-subtle` | **Non-text only**: placeholder icons, dividers' dots. Input placeholder text (exempt from AA, still 3.4:1) |
+| `border` | `#E4E0F5` | `border-border` (default border colour) | Decorative hairlines, card borders |
+| `border-strong` | `#8B87A8` | `border-border-strong` | Form input borders (needs ≥ 3:1 for UI components) |
+| `primary` | `#5B3FD9` | `bg-primary`, `text-primary` | Primary CTA, links, active nav, key numbers |
+| `primary-hover` | `#4A2FC4` | `hover:bg-primary-hover` | Hover/pressed for primary |
+| `primary-foreground` | `#FFFFFF` | `text-primary-foreground` | Text/icons on primary (also used as "white") |
+| `accent` | `#F5A524` | `fill-accent`, `bg-accent` | Star ratings, small highlight shapes/underlines. **Never text on light bg** |
+| `success` | `#15803D` | `text-success` | Form success, check icons |
+| `warning` | `#B45309` | `text-warning` | Warnings |
+| `error` | `#DC2626` | `text-error`, `border-error` | Validation errors |
+| `whatsapp` | `#25D366` | `bg-whatsapp` | WhatsApp button background (brand recognition) |
+| `whatsapp-hover` | `#1EBE5A` | `hover:bg-whatsapp-hover` | WhatsApp hover |
+| `whatsapp-foreground` | `#0B2E1A` | `text-whatsapp-foreground` | Text/icon on WhatsApp green (**white fails: 1.98:1**) |
+
+### Dark ("ink") sections
+
+Used for the featured pricing card, the testimonial/proof band (optional) and the footer. These come from OfferandPrice.png's navy "Pro" card.
+
+| Token | Hex | Role |
+|---|---|---|
+| `ink` | `#12112A` | Dark section/card background |
+| `ink-surface` | `#1E1C3A` | Cards on ink |
+| `ink-foreground` | `#F6F4FF` | Headings/body on ink |
+| `ink-muted` | `#B8B4D6` | Muted text on ink |
+| `ink-primary` | `#A996FF` | Links, numbers, icons on ink. Focus ring on ink |
+
+On ink, primary buttons stay `bg-primary text-primary-foreground` (6.65:1). The violet-on-navy edge is visible enough for a filled button.
+
+### Contrast ratios (WCAG 2.x, all text pairs ≥ 4.5:1)
+
+| Text / Background | Ratio | Pass |
+|---|---|---|
+| foreground / background | 18.24 | AAA |
+| foreground / surface | 16.77 | AAA |
+| foreground / surface-strong | 15.37 | AAA |
+| muted / background | 6.80 | AA |
+| muted / surface | 6.25 | AA |
+| primary / background (links) | 6.65 | AA |
+| primary / surface | 6.11 | AA |
+| primary / surface-strong (badge) | 5.60 | AA |
+| primary-foreground / primary | 6.65 | AA |
+| primary-foreground / primary-hover | 8.42 | AAA |
+| success / background | 5.02 | AA |
+| warning / background | 5.02 | AA |
+| error / background | 4.83 | AA |
+| whatsapp-foreground / whatsapp | 7.46 | AAA |
+| foreground / accent (e.g. "Most popular" chip) | 8.94 | AAA |
+| ink-foreground / ink | 16.94 | AAA |
+| ink-muted / ink | 9.25 | AAA |
+| ink-muted / ink-surface | 8.22 | AAA |
+| ink-primary / ink | 7.45 | AAA |
+| border-strong / background (UI, needs 3:1) | 3.43 | AA (UI) |
+
+**Fixed from references:** #6D4AE0 → #5B3FD9 (only 5.67 before and borderline on lavender). White-on-WhatsApp-green → dark green text. Amber is never used as text on white (2.04:1).
+
+---
+
+## 3. Typography
+
+**Family:** Plus Jakarta Sans (variable, Google Fonts via `next/font/google`, `variable: "--font-jakarta"`, `display: "swap"`), mapped to `--font-sans` → `font-sans`. It's a geometric sans matching the Hero/pricing references. **One family only**; serif headings seen in project.png/footer.png were rejected for coherence and load weight.
+
+Sizes are **fluid** (`clamp()`), so a single class works on all screens: no `text-h2 md:text-h1` pairs needed. Each token sets size, line-height, letter-spacing and weight (where listed); override weight with `font-*` only when a component recipe says so. Tailwind's default `text-sm/base/lg…` sizes are **removed**.
+
+| Token (`text-*`) | Mobile (360px) | Desktop (≥1280px) | Line-height | Weight | Tracking | Use |
+|---|---|---|---|---|---|---|
+| `text-display` | 40px | 60px | 1.05 | 800 | -0.03em | Home hero h1 only |
+| `text-h1` | 34px | 48px | 1.1 | 800 | -0.025em | h1 on inner pages |
+| `text-h2` | 28px | 36px | 1.15 | 700 | -0.02em | Section titles |
+| `text-h3` | 20px | 24px | 1.3 | 700 | -0.01em | Card titles, sub-sections |
+| `text-h4` | 18px | 18px | 1.4 | 600 | -0.005em | Small headings, pricing tier names |
+| `text-body-lg` | 17px | 20px | 1.6 | 400 | 0 | Hero/section lead paragraphs |
+| `text-body` | 16px | 16px | 1.65 | 400 | 0 | Default body (set on `<body>`) |
+| `text-small` | 14px | 14px | 1.55 | 400 | 0 | Card descriptions, meta, form help |
+| `text-caption` | 12px | 12px | 1.4 | 600 | 0.06em | Eyebrows (uppercase), labels, legal |
+
+Rules: max line length ~65ch for body (`max-w-article` on long text). Never go below 14px for readable copy (caption is for labels/eyebrows only). Two-tone headlines (Hero.png) are allowed: wrap the second phrase in `<span class="text-primary">`.
+
+---
+
+## 4. Spacing & layout
+
+- **Base unit 4px** (Tailwind default spacing). **Allowed steps:** `1 2 3 4 5 6 8 10 12 16 20 24` (4px → 96px). Don't use other values.
+- **Section padding:** `py-section md:py-section-lg` (64px mobile / 96px desktop). Hero may use `pt-10 pb-section md:pt-16`.
+- **Container:** `mx-auto w-full max-w-site px-5 md:px-8` (1152px max; 20px / 32px gutters). Long-form text: `max-w-article`.
+- **Breakpoints** (Tailwind defaults): `sm` 640, `md` 768, `lg` 1024, `xl` 1280. Design order: base (360) → `md` → `lg`.
+- **Grids:**
+  - Card grids: `grid gap-5 sm:grid-cols-2 lg:grid-cols-3` (services, testimonials, pricing). Case studies: `lg:grid-cols-4` allowed (project.png).
+  - Hero / split sections: `grid items-center gap-10 lg:grid-cols-2`. Text first on mobile, media second.
+  - Gaps: `gap-5` inside grids, `gap-3` within card internals, `space-y-4` for text stacks, `mt-10 md:mt-12` between a section header and its content.
+- Stack vertically below `md`. No horizontal scroll ever; carousels are not used (they hide content and add JS).
+
+---
+
+## 5. Shape & depth
+
+| Token | Value | Use |
+|---|---|---|
+| `rounded-sm` | 8px | Inputs, small chips, icon tiles |
+| `rounded-md` | 12px | Buttons, dropdowns |
+| `rounded-lg` | 16px | Cards (service, testimonial, stats) |
+| `rounded-xl` | 24px | Section panels (hero stats panel, pre-footer CTA band, pricing cards), images in cards |
+| `rounded-pill` | 9999px | Badges, eyebrow pills, avatars, floating WhatsApp |
+
+**Borders:** 1px `border-border` on cards on white. Cards on `surface` need no border (shadow only). Inputs: 1px `border-border-strong`, error `border-error`. Featured pricing card: no border, `bg-ink`.
+
+**Shadows** (violet-tinted, soft; matches the floating stat cards in Hero.png):
+
+| Token | Use |
+|---|---|
+| `shadow-card` | Default resting cards, navbar on scroll |
+| `shadow-raised` | Card hover, floating WhatsApp, mobile menu panel, featured pricing card |
+| `shadow-focus` | Optional extra halo on focused inputs (`focus:shadow-focus`) |
+
+---
+
+## 6. Components
+
+Folder: primitives in `components/ui/`, page sections in `components/sections/`. Recipes below are the canonical class strings. Extract them into the component, don't re-type them in pages.
+
+**Shared states (all interactive elements):**
+- Focus: global `:focus-visible` outline 2px `primary`, 2px offset (`ink-primary` inside `.bg-ink`). Never remove outlines.
+- Disabled: `disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none`.
+- Loading: keep width, swap label to a spinner + "Sending…", `aria-busy="true"`, disabled.
+- Transitions: `transition-colors duration-150` (see §8).
+
+### 6.1 Button
+Anatomy: `<button>`/`<Link>` → optional leading icon (20px) → label → optional trailing icon (`ArrowRight` 18px). Min height 48px (`h-12`), small size 44px (`h-11`).
+
+Base: `inline-flex items-center justify-center gap-2 h-12 px-6 rounded-md text-body font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed`
+
+| Variant | Classes | Use |
+|---|---|---|
+| primary | `bg-primary text-primary-foreground hover:bg-primary-hover shadow-card` | The one main CTA per section |
+| secondary | `bg-background text-primary border border-primary hover:bg-surface-strong` | Second option next to primary |
+| ghost | `text-primary hover:bg-surface-strong px-4` | Tertiary (e.g. "Watch demo", "See all work") |
+| whatsapp | `bg-whatsapp text-whatsapp-foreground hover:bg-whatsapp-hover` + WhatsApp icon | "Chat on WhatsApp" |
+| on-ink primary | same as primary | Inside `bg-ink` |
+| on-ink secondary | `border border-ink-muted text-ink-foreground hover:bg-ink-surface` | Inside `bg-ink` |
+
+Sizes: `sm` = `h-11 px-4 text-small`, `md` (default) = above, full-width on mobile forms: `w-full sm:w-auto`.
+Loading: `<Loader2 className="size-5 animate-spin" aria-hidden />` + label "Sending…".
+
+### 6.2 Link (inline)
+`text-primary font-medium underline underline-offset-4 decoration-primary/40 hover:decoration-primary`. On ink: `text-ink-primary`.
+Arrow link ("View case study →"): `inline-flex items-center gap-1.5 text-small font-semibold text-primary hover:gap-2.5 transition-all` with `ArrowRight size-4`. External links get `rel="noopener"` and a visible label, never "click here".
+
+### 6.3 Navbar
+Anatomy (Hero.png): logo left · nav links centre/right · primary CTA right. Sticky, white.
+- Wrapper: `sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border` (add `shadow-card` after scroll is optional; skip if it needs JS).
+- Inner: container + `flex h-16 items-center justify-between`.
+- Links (desktop `lg:flex gap-8`): `text-small font-medium text-muted hover:text-foreground`, active: `text-primary` + `aria-current="page"`.
+- CTA: Button primary size sm, "Free audit".
+- **Mobile (< lg):** logo · hamburger button (`size-11`, `Menu`/`X` icon, `aria-expanded`, `aria-controls`). Panel: full-width below the bar, `bg-background shadow-raised`, links stacked `py-3 text-h4`, then full-width primary CTA + WhatsApp button. Use `<details>`/`<dialog>` or a tiny client component; close on link click and Esc. Body scroll lock not required.
+
+### 6.4 Hero
+Anatomy (Hero.png): eyebrow pill → h1 (two-tone) → lead → CTA row (primary + ghost/WhatsApp) → social proof row → media (image + up to 3 floating stat cards).
+- Section: `bg-surface` + container, `grid items-center gap-10 lg:grid-cols-2 pt-10 pb-section md:pt-16`.
+- Eyebrow: Badge (soft) uppercase.
+- h1: `text-display text-foreground` with `<span class="text-primary">` for the outcome phrase.
+- Lead: `text-body-lg text-muted max-w-article`.
+- CTAs: `flex flex-col gap-3 sm:flex-row`: primary "Get my free website audit" + whatsapp "Chat on WhatsApp".
+- Proof: avatar stack (`-space-x-2`, `size-9 rounded-pill ring-2 ring-background`) + 5 stars (`fill-accent text-accent size-4`) + `text-small text-muted` line. **Only with real reviews**; otherwise omit.
+- Media: `next/image` with `priority`, `rounded-xl`, aspect 4/5 on desktop, hidden or 16/10 on mobile. Floating stat cards: `bg-background rounded-lg shadow-card p-4` with icon chip + number `text-h3` + label `text-small text-muted`. On mobile they become a row of 3 under the media (no overlap).
+- No decorative squiggles that need extra images; a single inline SVG accent is fine.
+
+### 6.5 Section header
+Anatomy: eyebrow (optional) → h2 → intro (optional) → optional right-aligned link on desktop.
+`max-w-2xl` (centred: `mx-auto text-center`).
+- Eyebrow: `text-caption uppercase text-primary`.
+- Title: `text-h2 text-foreground mt-2`.
+- Intro: `text-body-lg text-muted mt-4`.
+Left-aligned by default; centre only for pricing/FAQ/testimonials.
+
+### 6.6 Service card
+Anatomy: icon tile → h3 → 1–2 line description → 3 bullet outcomes (optional) → arrow link.
+`group flex flex-col gap-3 rounded-lg border border-border bg-background p-6 shadow-card transition-shadow hover:shadow-raised`
+- Icon tile: `grid size-12 place-items-center rounded-sm bg-surface-strong text-primary` (lucide 24px).
+- Title `text-h3`, description `text-small text-muted`, link per §6.2 pushed to bottom with `mt-auto`.
+- Whole card clickable via the title link with `after:absolute after:inset-0` (card `relative`), one tab stop only.
+
+### 6.7 Case study card
+Anatomy (project.png): image top (coloured bg) → category caption → title → one-line result → arrow link.
+`group relative flex flex-col overflow-hidden rounded-lg border border-border bg-background shadow-card hover:shadow-raised transition-shadow`
+- Media: `relative aspect-[4/3] bg-surface-strong` + `next/image fill object-cover` (`sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw"`).
+- Body `flex flex-1 flex-col gap-2 p-5`: caption `text-caption uppercase text-muted` (industry) · title `text-h4` · result `text-small text-muted` (lead with a metric, real only) · arrow link "View case study" `mt-auto`.
+- Grid `sm:grid-cols-2 lg:grid-cols-4`, followed by a centred ghost/secondary "See all work" button.
+
+### 6.8 Testimonial
+Anatomy (reviews.png): avatar + name/role → 5 stars → quote.
+`flex flex-col gap-4 rounded-lg bg-background p-6 shadow-card` (on ink: `bg-ink-surface`, text `ink-foreground`, muted `ink-muted`).
+- Header `flex items-center gap-3`: avatar `size-12 rounded-pill object-cover`, name `text-small font-semibold`, role/business + city `text-caption text-muted normal-case tracking-normal`.
+- Stars: `Star` ×5 `size-4 fill-accent text-accent`, with `aria-label="Rated 5 out of 5"` on the wrapper.
+- Quote: `<blockquote class="text-body text-foreground">`.
+- Section variant: full-bleed `bg-primary` band (reviews.png). Then headings use `text-primary-foreground` and cards stay white. Or `bg-ink`. Real reviews only; link to the Google Business profile if available.
+
+### 6.9 Pricing card
+Anatomy (OfferandPrice.png): tier name → price + "/project" or "starting at" → one-line who-it's-for → CTA → check-list.
+- Default: `flex flex-col gap-6 rounded-xl border border-border bg-background p-8 shadow-card`.
+- Featured: `bg-ink text-ink-foreground shadow-raised border-0 lg:-my-4` + Badge "Most popular" (`bg-accent text-foreground`) top-right.
+- Tier `text-h4`, price `text-h1` + suffix `text-small text-muted`/`text-ink-muted`. Use ₹ and Indian grouping (₹24,999). Prefer "Starting at".
+- CTA: full-width primary "Get a quote" / "Book free audit".
+- Features: `space-y-3 text-small`, each `flex gap-3` with `Check size-5 text-success` (on ink `text-ink-primary`).
+- Below grid: `text-small text-muted text-center` "All prices exclude GST. [PLACEHOLDER]".
+
+### 6.10 FAQ accordion
+Native `<details name="faq">` (no JS; exclusive open via `name`). Must also emit FAQPage JSON-LD.
+- List: `divide-y divide-border rounded-lg border border-border bg-background`.
+- `<summary>`: `flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-h4 [&::-webkit-details-marker]:hidden` + `ChevronDown size-5 text-muted transition-transform group-open:rotate-180` (`<details class="group">`). Min height 56px.
+- Answer: `px-5 pb-5 text-body text-muted`.
+
+### 6.11 Form fields + validation
+Anatomy: label → (help) → control → error message.
+- Label: `block text-small font-semibold text-foreground mb-1.5`. Required marker: `<span class="text-error" aria-hidden>*</span>` + `required`.
+- Input/select/textarea: `block w-full h-12 rounded-sm border border-border-strong bg-background px-4 text-body text-foreground placeholder:text-subtle focus:border-primary focus:shadow-focus focus:outline-none` (textarea: `h-auto min-h-32 py-3`). Font-size 16px minimum (prevents iOS zoom).
+- Help: `mt-1.5 text-small text-muted`, linked via `aria-describedby`.
+- Error: input gets `aria-invalid="true" border-error`. Message `mt-1.5 flex gap-1.5 text-small text-error` with `AlertCircle size-4`, `id` referenced by `aria-describedby`. Messages say how to fix ("Enter a 10-digit mobile number").
+- Form-level error: `role="alert"` box `rounded-sm border border-error bg-background p-4 text-small text-error`. Success: replace form with success panel (`CheckCircle2 text-success`, h3 "Thanks! We'll WhatsApp/call you within 24 hours").
+- Correct input types: `type="tel" inputmode="numeric" autocomplete="tel"`, `type="email" autocomplete="email"`, `type="url"`.
+
+### 6.12 Lead form ("Free website audit")
+The primary conversion. Server action + zod on the server; same schema for client hints.
+Fields (keep ≤ 4 required): **Name**, **WhatsApp / phone** (+91), **Website URL** (optional, "Don't have one? Leave blank"), **What do you need?** (select: Website, App, SEO, Google/Meta Ads, Not sure). Optional message. Hidden honeypot field.
+- Wrapper: `rounded-xl bg-background p-6 md:p-8 shadow-raised` (on `bg-surface` section or in hero right column on inner pages).
+- Title `text-h3` "Get your free website audit", sub `text-small text-muted` "Report in 48 hours. No obligation. [PLACEHOLDER]".
+- Fields stack `space-y-5`; submit full-width primary "Get my free audit".
+- Under submit: `text-caption text-muted normal-case tracking-normal` privacy line + "Prefer WhatsApp?" link.
+- Uses `useActionState` for pending/errors; button shows loading state.
+
+### 6.13 Badge
+`inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-caption uppercase`
+- soft (eyebrow, Hero.png): `bg-surface-strong text-primary`
+- outline: `border border-border bg-background text-muted`
+- highlight ("Most popular"): `bg-accent text-foreground`
+- on ink: `bg-ink-surface text-ink-primary`
+
+### 6.14 Stats row
+Anatomy (OfferandPrice.png): number + label in white cards on lavender.
+- Wrapper: `grid grid-cols-2 gap-4 lg:grid-cols-4`.
+- Stat: `rounded-lg bg-background p-5 text-center shadow-card`. Number `text-h2 text-primary`, label `text-small text-muted mt-1`.
+- **Only real, verifiable numbers.** Until then, use `[PLACEHOLDER]` or replace the stats row with "process steps".
+
+### 6.15 Footer
+Anatomy (footer.png): **pre-footer CTA band** → columns → bottom bar.
+- Pre-footer band (repurposed from newsletter to audit CTA): `rounded-xl bg-surface-strong p-6 md:p-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between`. Icon circle `size-14 rounded-pill bg-primary text-primary-foreground`, `text-h3` "Not sure what's holding your website back?", primary button + whatsapp button.
+- Footer: `bg-ink text-ink-muted`, `grid gap-10 sm:grid-cols-2 lg:grid-cols-4 py-section`.
+  - Col 1: logo, 2-line blurb, NAP (Name, Address, Phone: must match the Google Business profile), social icons (`size-11` hit area).
+  - Col 2 Services, Col 3 Company (About, Work, Blog, Contact), Col 4 Contact (WhatsApp, email, hours, Noida).
+  - Headings `text-h4 text-ink-foreground`, links `text-small hover:text-ink-foreground`, `py-1.5` for touch.
+- Bottom bar: `border-t border-ink-surface py-6 text-caption normal-case tracking-normal` © year, Privacy, Terms.
+- Payment logos from footer.png: **not used** (not relevant for a service agency).
+
+### 6.16 Floating WhatsApp button
+Always visible, bottom-right; the secondary conversion.
+`fixed bottom-4 right-4 z-50 inline-flex h-14 items-center gap-2 rounded-pill bg-whatsapp px-4 text-whatsapp-foreground shadow-raised hover:bg-whatsapp-hover md:bottom-6 md:right-6`
+- Icon 28px (WhatsApp glyph as inline SVG; lucide has no brand icons). Label "Chat" visible on `md+`, `sr-only` on mobile (button becomes `size-14 justify-center px-0`).
+- `href="https://wa.me/91XXXXXXXXXX?text=<url-encoded prefilled message incl. page name>"`, `target="_blank" rel="noopener"`, `aria-label="Chat with us on WhatsApp"`.
+- Must not cover the lead form submit on mobile: add `pb-20` to the page bottom / footer on mobile.
+
+---
+
+## 7. Iconography & imagery
+
+- **Icons:** `lucide-react` (installed; import individual icons, tree-shaken). Stroke `1.75` (2 for ≤16px). Sizes: 16 (`size-4`) inline/stars, 20 (`size-5`) buttons/lists, 24 (`size-6`) card icon tiles. Colour inherits (`currentColor`). Decorative icons: `aria-hidden`. Icon-only buttons need `aria-label`. Brand icons (WhatsApp, Instagram, Facebook, LinkedIn) as small inline SVG components in `components/ui/icons/`.
+- **Imagery:** real photos of the founder, real client screenshots (device mockups as in project.png), Indian small-business context. No generic stock "handshake/laptop" photos or AI faces pretending to be clients.
+- **Aspect ratios:** hero portrait 4/5, case study cover 4/3, blog cover 16/9 (also the OG image ratio ~1.91/1 generated separately), avatars 1/1.
+- **`next/image` always.** Hero image `priority` + `sizes`. Everything else lazy (default). Provide `width/height` or `fill` + sized parent to avoid CLS. AVIF/WebP via Next defaults. Source images ≤ 2400px wide.
+- Alt text: describe content and purpose ("Mobile screens of the Sharma Dental booking site"); decorative images `alt=""`.
+
+---
+
+## 8. Motion
+
+Minimal and CSS-only. No animation libraries without asking.
+
+| What | Duration | Easing |
+|---|---|---|
+| Colour/background/border hover | 150ms (`duration-150`) | default `ease-out` |
+| Card shadow lift | 200ms (`duration-200 transition-shadow`) | `ease-out-soft` |
+| Accordion chevron, mobile menu | 200ms | `ease-out-soft` |
+| Arrow-link nudge | 150ms (gap change) | default |
+
+- No scroll-triggered reveals, parallax, auto-playing carousels or count-up numbers (they hurt LCP/INP and accessibility).
+- `prefers-reduced-motion: reduce` disables all transitions/animations and smooth scroll globally (in `globals.css`). Spinners still indicate loading via the "Sending…" text.
+
+---
+
+## 9. Page templates
+
+### Home (`/`)
+1. **Navbar**: orientation + always-visible "Free audit" CTA.
+2. **Hero**: who we help + outcome promise + audit CTA + WhatsApp. Proof row only if real.
+3. **Trust strip**: real client logos or "Trusted by businesses in Noida" + Google rating. Omit if none.
+4. **Services** (4 cards: Websites, Mobile apps, SEO, Google & Meta Ads): what we sell, each linking to a service page.
+5. **Selected work** (case study cards): proof.
+6. **Process** (3–4 steps: Audit → Plan → Build → Grow): reduces uncertainty.
+7. **Stats row**: real numbers only, else skip.
+8. **Testimonials**: social proof.
+9. **Pricing teaser** ("Starting at"): pre-qualifies leads, links to /pricing or service pages.
+10. **Lead form section** (bg-surface, form + "what you get in the audit" list): primary conversion.
+11. **FAQ**: handle objections + FAQPage JSON-LD.
+12. **Pre-footer CTA band + Footer**: last-chance conversion, NAP for local SEO.
+
+### Service page (`/services/[slug]`)
+Hero (h1 = service + city, lead, audit CTA) → Problems we solve (pain points) → What's included (feature list/cards) → Process → Related case studies → Pricing (packages) → Testimonials (service-specific) → FAQ (service-specific) → Lead form → Footer. JSON-LD: Service + FAQPage + BreadcrumbList.
+
+### Case study page (`/work/[slug]`)
+Hero (client, industry, one-line result, cover image) → Summary box (challenge / solution / results, tech, timeline) → The challenge → What we did (screenshots) → Results (real metrics) → Client quote → Next case study + CTA "Want results like this? Get a free audit" → Footer.
+
+### Blog post (`/blog/[slug]`)
+Breadcrumbs → h1 + meta (author, date, reading time) → cover image 16/9 → table of contents (long posts) → article body (`max-w-article`, typography styles) with one inline CTA box mid-article → author box → related posts → lead form/CTA band → Footer. JSON-LD: Article/BlogPosting + BreadcrumbList.
+
+### Contact (`/contact`)
+h1 "Let's grow your business" + short lead → two columns: Lead form (left/top on mobile) | direct options (WhatsApp button, phone `tel:`, email, hours, address + lazy map link, not an embedded iframe) → mini FAQ (response time, pricing, process) → Footer. JSON-LD: LocalBusiness.
+
+---
+
+## 10. Content & voice
+
+- **Tone:** friendly, direct, plain English that a shop owner in Noida understands. "You" focused. No jargon ("synergy", "leverage", "cutting-edge"). Short sentences. Indian English spelling, ₹ and Indian number grouping (₹1,50,000 or "₹1.5 lakh").
+- **Headline formulas:**
+  - Outcome + audience: "More customers for your Noida business, from Google and WhatsApp."
+  - Problem → fix: "Your website should bring enquiries, not just look nice."
+  - Specific + local: "Web apps and mobile apps that win customers in Noida."
+- **CTA wording** (first person, outcome first): primary "Get my free website audit", short "Free audit", WhatsApp "Chat on WhatsApp", secondary "See our work", "View case study". Never "Submit", "Learn more", "Click here".
+- **Microcopy:** state what happens next ("We'll reply on WhatsApp within 24 hours").
+- **Hard rule: never invent clients, testimonials, logos, ratings, stats or case-study results.** Use `[PLACEHOLDER: real testimonial from client]`, `[PLACEHOLDER: number of projects]` etc. until the owner supplies real data. Placeholders are visible, and must be resolved before launch.
+
+---
+
+## 11. Accessibility & performance budget
+
+**Accessibility (WCAG 2.2 AA):**
+- Text contrast ≥ 4.5:1 (large text ≥ 3:1), UI component contrast ≥ 3:1 (all tokens above comply).
+- Visible focus on every interactive element (global `:focus-visible`). Keyboard reachable menu, accordion, form.
+- Touch targets ≥ 44×44px (`h-11`/`size-11` minimum; buttons `h-12`).
+- One `h1` per page, logical heading order, landmarks (`header`, `nav`, `main`, `footer`), skip link "Skip to content".
+- Forms: labels (not placeholder-only), `aria-describedby` for help/errors, `aria-invalid`, errors announced (`role="alert"`).
+- `lang="en-IN"`, descriptive link text, alt text on all informative images.
+
+**Performance budget (mobile, Lighthouse, Moto G-class on 4G):**
+| Metric | Target |
+|---|---|
+| Lighthouse Performance / Accessibility / Best Practices / SEO | ≥ 90 / ≥ 95 / ≥ 95 / 100 |
+| LCP | < 2.5s (aim < 2.0s) |
+| CLS | < 0.1 |
+| INP | < 200ms |
+| First-load JS per route | < 120KB gzipped |
+| Hero image | < 120KB (AVIF/WebP), `priority` |
+| Fonts | 1 variable family, `display: swap`, latin subset only |
+| Third-party scripts | GA4/Meta Pixel loaded `afterInteractive`/`lazyOnload` via `next/script`; no chat widgets |
+
+---
+
+## 12. Do / Don't
+
+| Do | Don't |
+|---|---|
+| Lavender `surface` sections alternating with white (Hero.png, OfferandPrice.png) | Cream/pink backgrounds or a second loud brand colour (project.png rejected) |
+| Two-tone h1: ink + violet phrase (Hero.png) | Serif display headings (project.png/footer.png rejected) |
+| White cards with soft violet shadow and 16–24px radius | Hard black shadows, sharp corners, heavy borders |
+| Eyebrow pill badge above headlines (Hero.png) | More than one eyebrow per section |
+| Stat cards with violet numbers (Hero.png, OfferandPrice.png) | Inflated/fake numbers ("10,000+ happy clients") |
+| One dark `ink` element for emphasis (featured pricing card, footer) | Whole pages in dark mode, or several competing dark blocks |
+| Testimonial cards with avatar, name and stars (reviews.png) | Anonymous or invented testimonials, AI-generated faces |
+| Case study cards with industry label + result + arrow link (project.png) | Portfolio items without outcomes |
+| Pre-footer CTA band (footer.png), used for the audit | Newsletter signup as the main footer CTA; payment logos |
+| Amber only for stars/small highlights | Amber text on white (2.0:1) |
+| Dark text on WhatsApp green | White text on #25D366 (1.98:1) |
+| Static, fast, CSS-only motion | Decorative hand-drawn squiggles as heavy images, scroll animations, carousels |
+
+---
+
+## 13. Reference map
+
+| File | What was taken | What was rejected |
+|---|---|---|
+| `docs/design/Hero.png` | Violet primary + lavender bg, geometric sans (→ Plus Jakarta Sans), two-tone bold headline, eyebrow pill badge, primary CTA + ghost secondary, avatar-stack + stars social proof, floating stat cards with icon chips, white sticky navbar with CTA on the right, "trusted by" logo strip | Decorative scribble/sparkle graphics, purple blob behind the photo (heavy, distracting) |
+| `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), 3-up row, full-bleed violet band variant | Wavy section edges, handwritten "It's possible!" doodles |
+| `docs/design/project.png` | Case study card anatomy (coloured image top with device mockups, category label, title, description, "View case study →"), 4-column grid, centred "See all" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
+| `docs/design/OfferandPrice.png` | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
+| `docs/design/footer.png` | Lavender pre-footer CTA band with icon circle + inline action, multi-column footer (brand + blurb + socials, link columns), copyright bar | Newsletter/discount framing (→ audit CTA), payment-method logos, serif heading, light footer (→ `ink` footer) |
+| `docs/design/notes.md` | *Not present*. Owner supplied: name **Web Merged**, city **Noida**, focus **web apps + SEO + mobile apps**. Contact/NAP details live in `lib/site.ts` (placeholders until supplied) | n/a |
