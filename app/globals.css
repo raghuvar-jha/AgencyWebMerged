@@ -27,6 +27,12 @@
   --color-primary-foreground: #ffffff;
   --color-accent: #f5a524;
 
+  /* Project card image tints (behind mockups only, never behind text) */
+  --color-tint-green: #c2d7b1;
+  --color-tint-pink: #f7b4ca;
+  --color-tint-yellow: #fac960;
+  --color-tint-purple: #b8a4ec;
+
   /* Feedback */
   --color-success: #15803d;
   --color-warning: #b45309;
@@ -118,8 +124,19 @@
   --spacing-section: 4rem; /* py-section (mobile) */
   --spacing-section-lg: 6rem; /* md:py-section-lg (desktop) */
 
+  /* ---------- Breakpoints (Tailwind defaults + xs) ---------- */
+  --breakpoint-xs: 22.5rem; /* xs: 360px, small-phone grids (tech cards 2 → 3 columns) */
+
   /* ---------- Motion ---------- */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hide a scrollbar but keep the element scrollable (touch, trackpad, keyboard). Tech tab bar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Font comes from next/font (app/layout.tsx), so it must be inlined. */
