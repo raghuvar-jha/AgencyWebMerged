@@ -23,11 +23,17 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo() {
+// md: navbar (mark 40→48, wordmark 18→28). sm: footer (mark 40, wordmark 20→24).
+const sizes = {
+  md: { mark: "size-10 lg:size-12", word: "text-h4 lg:text-title" },
+  sm: { mark: "size-10", word: "text-h3" },
+};
+
+export function Logo({ size = "md" }: { size?: keyof typeof sizes }) {
   return (
     <Link href="/" className="inline-flex items-center gap-3 rounded-sm" aria-label={`${site.name}, home`}>
-      <LogoMark className="size-10 lg:size-12" />
-      <span className="text-h4 font-extrabold tracking-tight text-foreground lg:text-title">{site.name}</span>
+      <LogoMark className={sizes[size].mark} />
+      <span className={`${sizes[size].word} font-extrabold tracking-tight text-foreground`}>{site.name}</span>
     </Link>
   );
 }
