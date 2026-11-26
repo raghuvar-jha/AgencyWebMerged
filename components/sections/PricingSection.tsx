@@ -1,6 +1,7 @@
 import { PricingCard } from "@/components/ui/PricingCard";
 import { cn } from "@/lib/cn";
 import { pricing } from "@/lib/content/home";
+import { Container } from "@/components/ui/Container";
 
 // Layout, DESIGN.md §6.9:
 // <md  one column, featured first
@@ -9,7 +10,7 @@ import { pricing } from "@/lib/content/home";
 export function PricingSection() {
   return (
     <section id="pricing" aria-labelledby="pricing-title" className="pt-8 pb-section md:pb-section-lg">
-      <div className="mx-auto w-full max-w-site px-5 md:px-8">
+      <Container>
         <header className="mx-auto max-w-2xl text-center">
           <h2 id="pricing-title" className="text-h2 text-foreground">
             {pricing.title}
@@ -31,7 +32,7 @@ export function PricingSection() {
             />
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

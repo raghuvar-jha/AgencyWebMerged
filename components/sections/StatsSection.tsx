@@ -3,6 +3,7 @@ import { Underline } from "@/components/decorations/Underline";
 import { ButtonLink } from "@/components/ui/Button";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { stats } from "@/lib/content/home";
+import { Container } from "@/components/ui/Container";
 
 // Desktop stagger ("rising steps"), DESIGN.md §6.14. Index = position in stats.items.
 // Below lg: plain 2×2 grid. lg: one row of 4. xl+: stagger (at lg it leaves the headline too narrow).
@@ -18,7 +19,7 @@ export function StatsSection() {
 
   return (
     <section id="stats" aria-labelledby="stats-title" className="pt-section pb-8">
-      <div className="mx-auto w-full max-w-site px-5 md:px-8">
+      <Container>
         <div className="relative overflow-hidden rounded-xl bg-surface px-6 py-10 md:rounded-2xl md:px-12 md:py-16 lg:px-20 lg:py-20">
           <RingPattern className="absolute top-1/2 left-3/5 hidden size-175 -translate-x-1/2 -translate-y-1/2 md:block" />
 
@@ -53,7 +54,7 @@ export function StatsSection() {
             </ul>
           </div>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

@@ -3,6 +3,7 @@ import { Underline } from "@/components/decorations/Underline";
 import { TechCard } from "@/components/ui/TechCard";
 import { TechTabs } from "@/components/ui/TechTabs";
 import { techCategories, techSection, type TechTabIcon } from "@/lib/content/tech";
+import { Container } from "@/components/ui/Container";
 
 // DESIGN.md §6.17–6.18. Full-bleed lavender band between Projects (white) and Stats.
 // Card grid: 2 cols < 360px · 3 from xs (360) · 4 from md · 6 from lg; a short last row is centred.
@@ -41,7 +42,7 @@ export function TechStackSection() {
 
   return (
     <section id="tech" aria-labelledby="tech-title" className="bg-surface py-section md:py-section-lg">
-      <div className="mx-auto w-full max-w-site px-5 md:px-8">
+      <Container>
         <header className="mx-auto max-w-2xl text-center">
           <p className="text-caption text-primary uppercase">{eyebrow}</p>
           <h2 id="tech-title" className="mt-2 text-h2 text-foreground">
@@ -52,7 +53,7 @@ export function TechStackSection() {
         </header>
 
         <TechTabs label={tablistLabel} tabs={tabs} />
-      </div>
+      </Container>
     </section>
   );
 }
