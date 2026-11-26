@@ -44,6 +44,17 @@ The violet comes from Hero.png / stats-pricing.png (#6D4AE0). It was **darkened 
 | `whatsapp-hover` | `#1EBE5A` | `hover:bg-whatsapp-hover` | WhatsApp hover |
 | `whatsapp-foreground` | `#0B2E1A` | `text-whatsapp-foreground` | Text/icon on WhatsApp green (**white fails: 1.98:1**) |
 
+### Project tints
+
+Pastel backgrounds for the image area of project cards (§6.7), sampled from project.png. **Behind mockups only: never behind text, never as section or button colours.** Assign one per project in `lib/content/projects.ts` (`tint`).
+
+| Token | Hex | Utility | Reference card |
+|---|---|---|---|
+| `tint-green` | `#C2D7B1` | `bg-tint-green` | card 1 |
+| `tint-pink` | `#F7B4CA` | `bg-tint-pink` | card 2 |
+| `tint-yellow` | `#FAC960` | `bg-tint-yellow` | card 3 |
+| `tint-purple` | `#B8A4EC` | `bg-tint-purple` | card 4 |
+
 ### Dark ("ink") sections
 
 Used for the featured pricing card, the testimonial/proof band (optional) and the footer. These come from stats-pricing.png's navy "Pro" card.
@@ -116,12 +127,12 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 - **Base unit 4px** (Tailwind default spacing). **Allowed steps:** `1 2 3 4 5 6 8 10 12 14 16 20 24` (4px → 96px; half-steps `0.5 1.5 2.5` only inside small components like badges). Don't use other values.
 - **Section padding:** `py-section md:py-section-lg` (64px mobile / 96px desktop). Hero may use `pt-10 pb-section md:pt-16`.
 - **Container:** `mx-auto w-full max-w-site px-5 md:px-8` (`max-w-site` = 1280px incl. gutters → 1216px content on desktop; 20px / 32px gutters). Navbar only: `max-w-nav` (1392px → 1328px content). Long-form text: `max-w-article`.
-- **Breakpoints** (Tailwind defaults): `sm` 640, `md` 768, `lg` 1024, `xl` 1280. Design order: base (360) → `md` → `lg`.
+- **Breakpoints** (Tailwind defaults + `xs`): `xs` 360 (token `--breakpoint-xs`, for small-phone grids only, e.g. tech cards 2 → 3 columns), `sm` 640, `md` 768, `lg` 1024, `xl` 1280. Design order: base (360) → `md` → `lg`.
 - **Grids:**
-  - Card grids: `grid gap-5 sm:grid-cols-2 lg:grid-cols-3` (services, testimonials, pricing). Case studies: `lg:grid-cols-4` allowed (project.png).
+  - Card grids: `grid gap-5 sm:grid-cols-2 lg:grid-cols-3` (services, testimonials, pricing). Project cards: four per row at lg (project.png, see §6.7).
   - Hero / split sections: `grid items-center gap-10 lg:grid-cols-2`. Text first on mobile, media second.
   - Gaps: `gap-5` inside grids, `gap-3` within card internals, `space-y-4` for text stacks, `mt-10 md:mt-12` between a section header and its content.
-- Stack vertically below `md`. No horizontal scroll ever; carousels are not used (they hide content and add JS).
+- Stack vertically below `md`. No page-level horizontal scroll ever; carousels are not used (they hide content and add JS). One exception: a tab bar that doesn't fit may scroll sideways **inside its own track** (`no-scrollbar` utility, §6.18).
 
 ---
 
@@ -179,6 +190,7 @@ Sizes: `sm` (pricing CTAs) = `h-11 px-4 text-small` · `md` (default, navbar CTA
 Options:
 - `shape="pill"` → `rounded-pill` (default shape is `rounded-sm`).
 - `trailingIcon="arrow-circle"` → appends a `size-8` circle (`border-2 border-current/80`) holding `ArrowRight size-4`, and replaces the size padding with `pl-7 pr-2 gap-3` (stats-pricing.png "See How It Works").
+- `trailingIcon="arrow"` → appends a plain `ArrowRight size-4` (stroke 2.25) after the label; size padding unchanged (project.png "See All Projects": `size="sm" shape="pill"`).
 - Inside `bg-ink` the global focus ring switches to `ink-primary` automatically; no separate ink variant needed.
 Loading: `<Loader2 className="size-5 animate-spin" aria-hidden />` + label "Sending…".
 
@@ -226,12 +238,21 @@ Anatomy: icon tile → h3 → 1–2 line description → 3 bullet outcomes (opti
 - Title `text-h3`, description `text-small text-muted`, link per §6.2 pushed to bottom with `mt-auto`.
 - Whole card clickable via the title link with `after:absolute after:inset-0` (card `relative`), one tab stop only.
 
-### 6.7 Case study card
-Anatomy (project.png): image top (coloured bg) → category caption → title → one-line result → arrow link.
-`group relative flex flex-col overflow-hidden rounded-lg border border-border bg-background shadow-card hover:shadow-raised transition-shadow`
-- Media: `relative aspect-[4/3] bg-surface-strong` + `next/image fill object-cover` (`sizes="(min-width:1024px) 25vw, (min-width:640px) 50vw, 100vw"`).
-- Body `flex flex-1 flex-col gap-2 p-5`: caption `text-caption uppercase text-muted` (industry) · title `text-h4` · result `text-small text-muted` (lead with a metric, real only) · arrow link "View case study" `mt-auto`.
-- Grid `sm:grid-cols-2 lg:grid-cols-4`, followed by a centred ghost/secondary "See all work" button.
+### 6.7 Project card + Projects section ("Selected Work")
+Implemented: `components/ui/ProjectCard.tsx` + `components/sections/ProjectsSection.tsx`. Data: `lib/content/projects.ts` (`Project` type, `featuredProjects`, `projectsSection`), separate from home.ts so the `/work` pages can reuse it. Placeholders only until real projects exist.
+Anatomy (project.png): tinted image area with device mockup → category → title → 2-line description → "View Case Study →".
+- Card: `<article aria-labelledby>` with `group relative flex h-full flex-col overflow-hidden rounded-lg border border-border bg-background shadow-card transition duration-200 ease-out-soft hover:shadow-raised motion-safe:hover:-translate-y-1`.
+- Whole card clickable: the link is a stretched link (`after:absolute after:inset-0`), the only tab stop. It has `focus-visible:outline-none`, and the card draws the ring instead: `has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-primary`. Never nest other interactive elements in the card.
+- Media: `relative aspect-7/4 overflow-hidden bg-tint-*` (measured: image area ≈ 51% of the card). Real image: wrapper `absolute inset-x-0 bottom-0 h-9/10` + `next/image fill object-contain object-bottom`, `sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"`, lazy (no `priority`). The two-phone composition is part of the image, not CSS. Placeholder: two `aspect-1/2 rounded-md border-2 border-foreground/10 bg-background` phones (`h-5/6`, then `h-3/4 -ml-5 mt-6`) + sr-only "[Project mockup]".
+- Body `flex flex-1 flex-col p-5`: category `text-small font-medium text-muted` · title `<h3>` `mt-0.5 text-h4 font-bold text-foreground` · description `mt-1.5 line-clamp-2 text-small text-muted` · link wrapper `mt-auto pt-3` (links line up across cards).
+- Link: `inline-flex items-center gap-1.5 text-small font-bold text-foreground group-hover:text-primary` + `ArrowRight size-3.5` with `motion-safe:group-hover:translate-x-1`; `aria-label="View Case Study: {title}"`.
+- Section: `id="work"` (nav "Work" → `/#work`), white background (it follows the lavender hero), `py-section md:py-section-lg`, `scroll-mt-16 lg:scroll-mt-24` (sticky navbar). No wave edges or doodles (§12).
+- Header: stacked `gap-6` below lg; at lg the same `grid-cols-4 gap-8` as the cards with `items-end`: eyebrow (`text-caption uppercase text-primary`) + `text-h2` + `Underline` (`mt-2 block w-28`) span columns 1–2, the intro (`max-w-md text-body text-muted`, 2 lines, inline `Heart size-4 fill-current text-primary role="img" aria-label="love"`) starts on column 3.
+- Grid `<ul>`, `mt-10`:
+  - < sm: one column, `max-w-md` centred, `gap-6`. **No horizontal scroll row** (§4).
+  - sm–lg: `grid-cols-4`, cards `col-span-2` (two per row); an odd last card gets `col-start-2` (centred).
+  - lg+: `grid-cols-8 gap-8`, cards `col-span-2` (four per row, ~280×336 at 1440). With 1–3 cards the first gets `col-start-4/3/2` so the row stays centred.
+- CTA `mt-12`, centred: `ButtonLink size="sm" shape="pill" trailingIcon="arrow"` "See All Projects" → `/work`. The section's only CTA.
 
 ### 6.8 Testimonial
 Anatomy (reviews.png): avatar + name/role → 5 stars → quote.
@@ -329,13 +350,33 @@ Always visible, bottom-right; the secondary conversion.
 - `href="https://wa.me/91XXXXXXXXXX?text=<url-encoded prefilled message incl. page name>"`, `target="_blank" rel="noopener"`, `aria-label="Chat with us on WhatsApp"`.
 - Must not cover the lead form submit on mobile: add `pb-20` to the page bottom / footer on mobile.
 
+### 6.17 Tech card
+Implemented: `components/ui/TechCard.tsx` (server). Data: `lib/content/tech.ts` (`TechCategory`, `TechItem { name, slug, tag? }`). Logos: `lib/tech-icons.ts` (`getTechLogo(slug)`), §7.
+Anatomy: logo → name → optional tag. Not a link: the `<li>` is the grid cell, the card is a `<div>` inside it.
+- Cell: `w-1/2 px-2.5 xs:w-1/3 md:w-1/4 lg:w-1/6` (half of the 20px gutter on each side).
+- Card: `flex h-full flex-col items-center rounded-lg border border-border bg-background px-3 py-5 text-center transition duration-200 ease-out-soft hover:border-primary/40 hover:shadow-card motion-safe:hover:-translate-y-0.5`.
+- Logo: `<svg viewBox="0 0 24 24" aria-hidden class="size-10 fill-current">` with `style={{ color: brandHex }}` (or `text-foreground` for near-invisible colours). Fallback: `grid size-10 place-items-center rounded-sm bg-surface-strong text-small font-bold text-primary` with initials (`aria-hidden`).
+- Name `mt-3 text-small font-semibold text-foreground`; tag `mt-0.5 text-caption font-medium normal-case tracking-normal text-muted`.
+- List: `<ul class="-mx-2.5 flex flex-wrap justify-center gap-y-5">` (gutter pattern). Columns: 2 below 360px · 3 from `xs` · 4 from `md` · 6 from `lg`; a short last row is **centred** by `justify-center`. (A plain CSS grid can't centre a partial row.)
+
+### 6.18 Tabs (segmented control) + Tech stack section
+Implemented: `components/ui/TechTabs.tsx` (the only client code: active index + keys) + `components/sections/TechStackSection.tsx` (server). The server renders the tab icons and **every panel**, then passes them in, so all content is in the HTML (SEO, no-JS shows the first panel) and logo data never ships as JS.
+- Track (also the scroller): `no-scrollbar mx-auto w-fit max-w-full overflow-x-auto rounded-pill bg-surface-strong p-1.5`. The rounded ends stay intact when tabs overflow on mobile.
+- Tablist `role="tablist" aria-label` → `flex w-max gap-1`.
+- Tab `<button role="tab" aria-selected aria-controls>`: `inline-flex h-11 shrink-0 items-center gap-2 rounded-pill px-5 text-small font-semibold whitespace-nowrap transition-colors duration-150` + lucide icon `size-4` (`aria-hidden`).
+  - active: `bg-background text-foreground shadow-card` · inactive: `text-muted hover:text-foreground` (`muted` on `surface-strong` ≈ 5.7:1).
+- Panel `role="tabpanel" aria-labelledby tabIndex={0}`, inactive ones `hidden`; fade in with `motion-safe:transition-opacity motion-safe:duration-150 motion-safe:starting:opacity-0` (CSS `@starting-style`, no keyframes).
+- Keyboard (automatic activation, roving tabindex): ←/→ move and wrap, Home/End jump; focus moves to and selects the tab, which `scrollIntoView({ inline: "nearest" })` inside the track; Tab goes on into the panel.
+- Section: `id="tech"`, full-bleed `bg-surface py-section md:py-section-lg` between Projects (white) and Stats. Centred header per §6.5 (`max-w-2xl`, eyebrow, `text-h2`, `Underline mx-auto mt-2 block w-28`, intro `mt-4 text-body text-muted`). Tabs `mt-10`, panel `mt-10`, category line `mt-8 text-center text-small text-muted`.
+
 ---
 
 ## 7. Iconography & imagery
 
-- **Icons:** `lucide-react` (installed; import individual icons, tree-shaken). Stroke `1.75` (2 for ≤16px). Sizes: 16 (`size-4`) inline/stars, 20 (`size-5`) buttons/lists, 24 (`size-6`) card icon tiles. Colour inherits (`currentColor`). Decorative icons: `aria-hidden`. Icon-only buttons need `aria-label`. Brand icons (WhatsApp, Instagram, Facebook, LinkedIn) as small inline SVG components in `components/ui/icons/`.
+- **Technology logos:** `simple-icons` (CC0, pinned), imported by name only in `lib/tech-icons.ts` (server-only, so 0 KB client JS). Rendered as inline SVG in the brand's own hex: the **only** non-token colours allowed. Near-invisible brand colours (< 1.5:1 on white, e.g. JavaScript yellow) render in `text-foreground`. Logos are `aria-hidden`; the visible name is the label. Missing logos (AWS, Ahrefs): initials badge.
+- **Icons:** `lucide-react` (installed; import individual icons, tree-shaken). It has **no brand logos**. Stroke `1.75` (2 for ≤16px). Sizes: 16 (`size-4`) inline/stars, 20 (`size-5`) buttons/lists, 24 (`size-6`) card icon tiles. Colour inherits (`currentColor`). Decorative icons: `aria-hidden`. Icon-only buttons need `aria-label`. Brand icons (WhatsApp, Instagram, Facebook, LinkedIn) as small inline SVG components in `components/ui/icons/`.
 - **Imagery:** real photos of the founder, real client screenshots (device mockups as in project.png), Indian small-business context. No generic stock "handshake/laptop" photos or AI faces pretending to be clients.
-- **Aspect ratios:** hero portrait 4/5, case study cover 4/3, blog cover 16/9 (also the OG image ratio ~1.91/1 generated separately), avatars 1/1.
+- **Aspect ratios:** hero portrait 4/5, project card image area 7/4 (case study page cover 4/3), blog cover 16/9 (also the OG image ratio ~1.91/1 generated separately), avatars 1/1.
 - **`next/image` always.** Hero image `priority` + `sizes`. Everything else lazy (default). Provide `width/height` or `fill` + sized parent to avoid CLS. AVIF/WebP via Next defaults. Source images ≤ 2400px wide.
 - Alt text: describe content and purpose ("Mobile screens of the Sharma Dental booking site"); decorative images `alt=""`.
 
@@ -365,6 +406,7 @@ Minimal and CSS-only. No animation libraries without asking.
 3. **Trust strip**: real client logos or "Trusted by businesses in Noida" + Google rating. Omit if none.
 4. **Services** (4 cards: Websites, Mobile apps, SEO, Google & Meta Ads): what we sell, each linking to a service page.
 5. **Selected work** (case study cards): proof.
+5b. **Tech stack** (tabbed technology cards, `bg-surface` band): credibility for web/app/backend/marketing skills.
 6. **Process** (3–4 steps: Audit → Plan → Build → Grow): reduces uncertainty.
 7. **Stats row**: real numbers only, else skip.
 8. **Testimonials**: social proof.
@@ -449,7 +491,7 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 |---|---|---|
 | `docs/design/Hero.png` | Violet primary + lavender bg, geometric sans (→ Plus Jakarta Sans), two-tone bold headline, eyebrow pill badge, primary CTA + ghost secondary, avatar-stack + stars social proof, floating stat cards with icon chips, white sticky navbar with CTA on the right, "trusted by" logo strip | Decorative scribble/sparkle graphics, purple blob behind the photo (heavy, distracting) |
 | `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), 3-up row, full-bleed violet band variant | Wavy section edges, handwritten "It's possible!" doodles |
-| `docs/design/project.png` | Case study card anatomy (coloured image top with device mockups, category label, title, description, "View case study →"), 4-column grid, centred "See all" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
+| `docs/design/project.png` | Project card anatomy (tinted image top with device mockups, category label, title, description, "View Case Study →"), the four pastel tints (→ `tint-*`), 4-column grid, header with intro on the 3rd column, centred pill "See All Projects" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
 | `docs/design/stats-pricing.png` (was OfferandPrice.png) | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
 | `docs/design/footer.png` | Lavender pre-footer CTA band with icon circle + inline action, multi-column footer (brand + blurb + socials, link columns), copyright bar | Newsletter/discount framing (→ audit CTA), payment-method logos, serif heading, light footer (→ `ink` footer) |
 | `docs/design/notes.md` | *Not present*. Owner supplied: name **Web Merged**, city **Noida**, focus **web apps + SEO + mobile apps**. Contact/NAP details live in `lib/site.ts` (placeholders until supplied) | n/a |

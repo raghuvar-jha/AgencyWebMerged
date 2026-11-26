@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "whatsapp";
 export type ButtonSize = "sm" | "md" | "lg";
 export type ButtonShape = "default" | "pill";
-export type ButtonTrailingIcon = "arrow-circle";
+export type ButtonTrailingIcon = "arrow-circle" | "arrow";
 
 const base =
   "inline-flex shrink-0 items-center justify-center gap-2 font-semibold whitespace-nowrap transition-colors duration-150 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
@@ -31,7 +31,10 @@ type StyleProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
   shape?: ButtonShape;
-  /** Adds a circled icon at the end; the button gets tight right padding (pill CTA, DESIGN.md §6.1). */
+  /**
+   * "arrow-circle": circled arrow at the end, tight right padding (stats pill CTA).
+   * "arrow": plain ArrowRight after the label, normal padding (DESIGN.md §6.1).
+   */
   trailingIcon?: ButtonTrailingIcon;
   fullWidth?: boolean;
 };
@@ -47,13 +50,21 @@ export function buttonClasses({
     base,
     variants[variant],
     sizes[size].box,
-    trailingIcon ? "gap-3 pr-2 pl-7" : sizes[size].padding,
+    trailingIcon === "arrow-circle" ? "gap-3 pr-2 pl-7" : sizes[size].padding,
     shape === "pill" ? "rounded-pill" : "rounded-sm",
     fullWidth && "w-full",
   );
 }
 
 function withTrailingIcon(children: ReactNode, trailingIcon?: ButtonTrailingIcon) {
+  if (trailingIcon === "arrow") {
+    return (
+      <>
+        {children}
+        <ArrowRight aria-hidden="true" className="size-4 shrink-0" strokeWidth={2.25} />
+      </>
+    );
+  }
   if (trailingIcon !== "arrow-circle") return children;
   return (
     <>
