@@ -19,7 +19,7 @@ The goal of every page is **lead generation**. Primary conversion: **"Get my fre
 
 ## 2. Colour system
 
-The violet comes from Hero.png / OfferandPrice.png (#6D4AE0). It was **darkened to #5B3FD9** so white button text and violet links on white both pass AA comfortably (6.65:1). Tailwind's default palette is **removed** (`--color-*: initial`), so only these utilities exist.
+The violet comes from Hero.png / stats-pricing.png (#6D4AE0). It was **darkened to #5B3FD9** so white button text and violet links on white both pass AA comfortably (6.65:1). Tailwind's default palette is **removed** (`--color-*: initial`), so only these utilities exist.
 
 ### Light (default)
 
@@ -46,7 +46,7 @@ The violet comes from Hero.png / OfferandPrice.png (#6D4AE0). It was **darkened 
 
 ### Dark ("ink") sections
 
-Used for the featured pricing card, the testimonial/proof band (optional) and the footer. These come from OfferandPrice.png's navy "Pro" card.
+Used for the featured pricing card, the testimonial/proof band (optional) and the footer. These come from stats-pricing.png's navy "Pro" card.
 
 | Token | Hex | Role |
 |---|---|---|
@@ -96,7 +96,8 @@ Sizes are **fluid** (`clamp()`), so a single class works on all screens: no `tex
 | Token (`text-*`) | Mobile (360px) | Desktop (≥1280px) | Line-height | Weight | Tracking | Use |
 |---|---|---|---|---|---|---|
 | `text-display` | 40px | 64px | 1.1 | 800 | -0.03em | Home hero h1 only (measured from Hero.png: 71px line pitch at 1440) |
-| `text-h1` | 34px | 48px | 1.1 | 800 | -0.025em | h1 on inner pages |
+| `text-display-sm` | 38px | 64px | 1.25 | 700 | -0.01em | Large section h2 in feature panels (stats panel; matched to stats-pricing.png, so tracking stays near-normal) |
+| `text-h1` | 34px | 48px | 1.1 | 800 | -0.025em | h1 on inner pages; also big numbers (metric values, prices) with `font-bold` |
 | `text-title` | 28px | 28px | 1.15 | 800 | -0.02em | Compact display: hero stat numbers, wordmark (not a heading level) |
 | `text-h2` | 28px | 36px | 1.15 | 700 | -0.02em | Section titles |
 | `text-h3` | 20px | 24px | 1.3 | 700 | -0.01em | Card titles, sub-sections |
@@ -131,7 +132,8 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 | `rounded-sm` | 8px | Buttons (measured ≈8px in Hero.png), inputs, small chips, icon tiles |
 | `rounded-md` | 12px | Dropdowns, menus |
 | `rounded-lg` | 16px | Cards (service, testimonial, stats) |
-| `rounded-xl` | 24px | Section panels (hero stats panel, pre-footer CTA band, pricing cards), images in cards |
+| `rounded-xl` | 24px | Section panels (pre-footer CTA band, hero trust bar, stats panel on mobile), images in cards |
+| `rounded-2xl` | 32px | Large feature panels from md up (stats panel) |
 | `rounded-pill` | 9999px | Badges, eyebrow pills, avatars, floating WhatsApp |
 
 **Borders:** 1px `border-border` on cards on white. Cards on `surface` need no border (shadow only). Inputs: 1px `border-border-strong`, error `border-error`. Featured pricing card: no border, `bg-ink`.
@@ -172,7 +174,12 @@ Base: `inline-flex shrink-0 items-center justify-center gap-2 rounded-sm font-se
 | on-ink primary | same as primary | Inside `bg-ink` |
 | on-ink secondary | `border border-ink-muted text-ink-foreground hover:bg-ink-surface` | Inside `bg-ink` |
 
-Sizes: `sm` = `h-11 px-4 text-small` · `md` (default, navbar CTA) = `h-12 px-6 text-small` · `lg` (hero / mobile menu) = `h-14 px-7 text-body`. Full width: `fullWidth` prop (`w-full`).
+Sizes: `sm` (pricing CTAs) = `h-11 px-4 text-small` · `md` (default, navbar CTA) = `h-12 px-6 text-small` · `lg` (hero / mobile menu / stats pill) = `h-14 px-7 text-body`. Full width: `fullWidth` prop (`w-full`).
+
+Options:
+- `shape="pill"` → `rounded-pill` (default shape is `rounded-sm`).
+- `trailingIcon="arrow-circle"` → appends a `size-8` circle (`border-2 border-current/80`) holding `ArrowRight size-4`, and replaces the size padding with `pl-7 pr-2 gap-3` (stats-pricing.png "See How It Works").
+- Inside `bg-ink` the global focus ring switches to `ink-primary` automatically; no separate ink variant needed.
 Loading: `<Loader2 className="size-5 animate-spin" aria-hidden />` + label "Sending…".
 
 ### 6.2 Link (inline)
@@ -234,14 +241,23 @@ Anatomy (reviews.png): avatar + name/role → 5 stars → quote.
 - Quote: `<blockquote class="text-body text-foreground">`.
 - Section variant: full-bleed `bg-primary` band (reviews.png). Then headings use `text-primary-foreground` and cards stay white. Or `bg-ink`. Real reviews only; link to the Google Business profile if available.
 
-### 6.9 Pricing card
-Anatomy (OfferandPrice.png): tier name → price + "/project" or "starting at" → one-line who-it's-for → CTA → check-list.
-- Default: `flex flex-col gap-6 rounded-xl border border-border bg-background p-8 shadow-card`.
-- Featured: `bg-ink text-ink-foreground shadow-raised border-0 lg:-my-4` + Badge "Most popular" (`bg-accent text-foreground`) top-right.
-- Tier `text-h4`, price `text-h1` + suffix `text-small text-muted`/`text-ink-muted`. Use ₹ and Indian grouping (₹24,999). Prefer "Starting at".
-- CTA: full-width primary "Get a quote" / "Book free audit".
-- Features: `space-y-3 text-small`, each `flex gap-3` with `Check size-5 text-success` (on ink `text-ink-primary`).
-- Below grid: `text-small text-muted text-center` "All prices exclude GST. [PLACEHOLDER]".
+### 6.9 Pricing card + Pricing section
+Implemented: `components/ui/PricingCard.tsx` (`variant: "default" | "featured"`, defaults from `plan.featured`) + `components/sections/PricingSection.tsx`. Data: `pricing` in `lib/content/home.ts` (`PricingPlan` type).
+Anatomy (stats-pricing.png): name (+ badge) → "Starting at" → price + period → CTA → check-list.
+- Card: `<article aria-labelledby>` with `flex flex-col rounded-lg px-8 py-10 md:px-10 lg:px-8 xl:px-10`.
+  - default: `border border-border bg-background shadow-card`
+  - featured: `bg-ink shadow-raised` (no border)
+- Top row: `flex min-h-8 flex-wrap items-center justify-between gap-x-4 gap-y-2`; name `<h3>` `text-h4 font-medium text-muted` (featured `text-ink-foreground/85`); badge `Badge variant="outline-ink"` (featured only).
+- Price block `mt-6`: "Starting at" `text-small text-muted` (featured `text-ink-muted`); then `<p class="flex flex-wrap items-baseline gap-x-1.5">` price `text-h1 font-bold text-foreground` (featured `text-ink-foreground`) + period `text-body text-muted` (featured `text-ink-muted`). Use ₹ and Indian grouping (₹24,999).
+- CTA `mt-6`: `ButtonLink size="sm" fullWidth`, `aria-describedby` = plan name id (several "Get Started" links need context).
+- Features `mt-8 space-y-4`: `flex gap-3 text-small text-muted` (featured `text-ink-foreground/85`) with `Check mt-0.5 size-4 strokeWidth 2.5 text-foreground` (featured `text-ink-foreground`), `aria-hidden`.
+- Section: `pt-8 pb-section md:pb-section-lg`; header `mx-auto max-w-2xl text-center`, h2 `text-h2`, subtitle `mt-4 text-body-lg text-muted`; cards `mt-10`.
+- Layout:
+  - < md: one column, `max-w-md` centred, `gap-5`, **featured first** (`order-first`), no extra height.
+  - md: **2 + 1**, featured spans both columns on top (`md:col-span-2 md:max-w-md md:mx-auto`), the other two side by side. No horizontal scroll.
+  - lg+: `flex items-stretch justify-center gap-6 xl:gap-8`, content order, equal heights; default `flex-1 max-w-84`, featured `flex-1 max-w-88 -my-2` (16px taller).
+- Contrast: `ink-foreground/85` on ink 12.4:1, `ink-muted` on ink 9.25:1. Badge border `primary/70` on ink is decorative (≈2:1); the badge text carries the meaning.
+- TODO when real: a "Prices exclude GST" note under the grid, if applicable.
 
 ### 6.10 FAQ accordion
 Native `<details name="faq">` (no JS; exclusive open via `name`). Must also emit FAQPage JSON-LD.
@@ -268,18 +284,33 @@ Fields (keep ≤ 4 required): **Name**, **WhatsApp / phone** (+91), **Website UR
 - Uses `useActionState` for pending/errors; button shows loading state.
 
 ### 6.13 Badge
-`inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-caption uppercase`
+Implemented: `components/ui/Badge.tsx` (`variant`). Base `inline-flex shrink-0 items-center gap-1.5 rounded-pill text-caption whitespace-nowrap`; padding `px-3 py-1 uppercase` unless noted.
 - soft: `bg-surface-strong text-primary`
 - eyebrow (hero, Hero.png): `rounded-pill border border-border bg-background/60 px-4 py-2.5 text-caption uppercase text-primary` (≈38px tall)
 - outline: `border border-border bg-background text-muted`
 - highlight ("Most popular"): `bg-accent text-foreground`
-- on ink: `bg-ink-surface text-ink-primary`
+- on ink (`ink`): `bg-ink-surface text-ink-primary`
+- outline on ink (`outline-ink`, "Most Popular" on the featured pricing card): `h-8 px-4 border border-primary/70 font-medium normal-case tracking-normal text-ink-foreground/85`
 
-### 6.14 Stats row
-Anatomy (OfferandPrice.png): number + label in white cards on lavender.
-- Wrapper: `grid grid-cols-2 gap-4 lg:grid-cols-4`.
-- Stat: `rounded-lg bg-background p-5 text-center shadow-card`. Number `text-h2 text-primary`, label `text-small text-muted mt-1`.
-- **Only real, verifiable numbers.** Until then, use `[PLACEHOLDER]` or replace the stats row with "process steps".
+### 6.14 Metric card + Stats panel
+Implemented: `components/ui/MetricCard.tsx` (`{ value, label }`, number only; the hero's `StatCard` has an icon) + `components/sections/StatsSection.tsx`. Data: `stats` in `lib/content/home.ts`. Decorations: `components/decorations/{Underline,RingPattern}.tsx`.
+- **Only real, verifiable numbers.** Until then values are `[X]` placeholders. No count-up animation (§8).
+- MetricCard: `flex h-full flex-col items-center justify-center gap-2.5 rounded-lg bg-background px-5 py-8 text-center shadow-card`; value `<p class="text-h1 font-bold text-primary">`; label `<p class="max-w-32 text-body leading-snug font-medium text-muted">` (max 2 lines). Fixed `xl:h-45 xl:w-44` (176×180) in the stagger.
+- Section: `pt-section pb-8` → container → panel `relative overflow-hidden rounded-xl bg-surface px-6 py-10 md:rounded-2xl md:px-12 md:py-16 lg:px-20 lg:py-20`.
+- `RingPattern`: 4 concentric circles, `stroke-primary-foreground/60`, 1.5px, `size-175` centred at `left-3/5 top-1/2`, md+ only.
+- h2: `text-display-sm`, one `block` span per line ("[X]+ Happy / Businesses / Trust Us"), last line `whitespace-nowrap` so the underline never wraps; `Underline` (`stroke-primary`, 3px, `w-28 md:w-40`, `ml-4 md:ml-6`, `inline-block align-middle`) after the last word.
+- Paragraph `mt-8 max-w-md text-body-lg text-muted`; CTA `mt-10` `ButtonLink size="lg" shape="pill" trailingIcon="arrow-circle"`, `w-full sm:w-auto`.
+- Cards `<ul>` (DOM order 1–4):
+  - < lg: `grid grid-cols-2 gap-4` (2×2).
+  - lg: `grid-cols-4` (one row; the stagger leaves the headline too narrow at 1024).
+  - xl+: text and cards side by side (`xl:flex-row xl:justify-between`), cards `grid-cols-3 grid-rows-[auto_1fr] gap-x-5 gap-y-8 items-start` ("rising steps"):
+    | Card | Placement |
+    |---|---|
+    | 1 | `col-start-1 row-span-2 mt-62` (248px down) |
+    | 2 | `col-start-2 row-span-2 mt-26` (104px down) |
+    | 3 | `col-start-3 row-start-1` (highest) |
+    | 4 | `col-start-3 row-start-2` (32px below card 3) |
+    `grid-rows-[auto_1fr]` keeps row 1 hugging card 3, so the spanning cards don't push card 4 down.
 
 ### 6.15 Footer
 Anatomy (footer.png): **pre-footer CTA band** → columns → bottom bar.
@@ -397,11 +428,11 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 
 | Do | Don't |
 |---|---|
-| Lavender `surface` sections alternating with white (Hero.png, OfferandPrice.png) | Cream/pink backgrounds or a second loud brand colour (project.png rejected) |
+| Lavender `surface` sections alternating with white (Hero.png, stats-pricing.png) | Cream/pink backgrounds or a second loud brand colour (project.png rejected) |
 | Two-tone h1: ink + violet phrase (Hero.png) | Serif display headings (project.png/footer.png rejected) |
 | White cards with soft violet shadow and 16–24px radius | Hard black shadows, sharp corners, heavy borders |
 | Eyebrow pill badge above headlines (Hero.png) | More than one eyebrow per section |
-| Stat cards with violet numbers (Hero.png, OfferandPrice.png) | Inflated/fake numbers ("10,000+ happy clients") |
+| Stat cards with violet numbers (Hero.png, stats-pricing.png) | Inflated/fake numbers ("10,000+ happy clients") |
 | One dark `ink` element for emphasis (featured pricing card, footer) | Whole pages in dark mode, or several competing dark blocks |
 | Testimonial cards with avatar, name and stars (reviews.png) | Anonymous or invented testimonials, AI-generated faces |
 | Case study cards with industry label + result + arrow link (project.png) | Portfolio items without outcomes |
@@ -419,6 +450,6 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | `docs/design/Hero.png` | Violet primary + lavender bg, geometric sans (→ Plus Jakarta Sans), two-tone bold headline, eyebrow pill badge, primary CTA + ghost secondary, avatar-stack + stars social proof, floating stat cards with icon chips, white sticky navbar with CTA on the right, "trusted by" logo strip | Decorative scribble/sparkle graphics, purple blob behind the photo (heavy, distracting) |
 | `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), 3-up row, full-bleed violet band variant | Wavy section edges, handwritten "It's possible!" doodles |
 | `docs/design/project.png` | Case study card anatomy (coloured image top with device mockups, category label, title, description, "View case study →"), 4-column grid, centred "See all" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
-| `docs/design/OfferandPrice.png` | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
+| `docs/design/stats-pricing.png` (was OfferandPrice.png) | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
 | `docs/design/footer.png` | Lavender pre-footer CTA band with icon circle + inline action, multi-column footer (brand + blurb + socials, link columns), copyright bar | Newsletter/discount framing (→ audit CTA), payment-method logos, serif heading, light footer (→ `ink` footer) |
 | `docs/design/notes.md` | *Not present*. Owner supplied: name **Web Merged**, city **Noida**, focus **web apps + SEO + mobile apps**. Contact/NAP details live in `lib/site.ts` (placeholders until supplied) | n/a |

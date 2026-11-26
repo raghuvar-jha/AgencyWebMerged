@@ -37,6 +37,7 @@ app/                  Routes (App Router). layout.tsx, globals.css (design token
   (marketing)/        Public pages: /, /services/[slug], /work/[slug], /blog/[slug], /contact
   actions/            Server actions (e.g. submitLead.ts)
 components/ui/        Primitives from DESIGN.md §6 (Button, Badge, Field, Accordion, icons/)
+components/decorations/ Decorative inline SVGs (aria-hidden), e.g. Underline, RingPattern
 components/sections/  Page sections (Hero, ServicesGrid, CaseStudies, Testimonials, Pricing, FAQ, LeadForm, Footer)
 lib/                  content/ (typed page copy, e.g. content/home.ts: no copy hard-coded in components), cn.ts (class joiner), site.ts (name, NAP, WhatsApp: the only place for business details), db.ts (Prisma client singleton), validation/ (zod schemas), JSON-LD helpers
 prisma/               schema.prisma + migrations/ (config in prisma.config.ts)
