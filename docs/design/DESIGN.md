@@ -26,7 +26,7 @@ The violet comes from Hero.png / stats-pricing.png (#6D4AE0). It was **darkened 
 | Token | Hex | Utility examples | Role |
 |---|---|---|---|
 | `background` | `#FFFFFF` | `bg-background` | Page background |
-| `surface` | `#F6F4FF` | `bg-surface` | Lavender section bg (hero, stats, pre-footer) |
+| `surface` | `#F6F4FF` | `bg-surface` | Lavender section bg (hero, stats, tech band, footer band) |
 | `surface-strong` | `#EDE9FE` | `bg-surface-strong` | Badges, icon chips, soft fills, selected states |
 | `foreground` | `#14122B` | `text-foreground` | Text-primary, headings |
 | `muted` | `#5B5873` | `text-muted` | Text-muted: body copy, descriptions, captions |
@@ -57,7 +57,7 @@ Pastel backgrounds for the image area of project cards (§6.7), sampled from pro
 
 ### Dark ("ink") sections
 
-Used for the featured pricing card, the testimonial/proof band (optional) and the footer. These come from stats-pricing.png's navy "Pro" card.
+Used for the featured pricing card and the testimonial/proof band (optional). The footer is **light** (§6.15). These come from stats-pricing.png's navy "Pro" card.
 
 | Token | Hex | Role |
 |---|---|---|
@@ -143,7 +143,7 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 | `rounded-sm` | 8px | Buttons (measured ≈8px in Hero.png), inputs, small chips, icon tiles |
 | `rounded-md` | 12px | Dropdowns, menus |
 | `rounded-lg` | 16px | Cards (service, testimonial, stats) |
-| `rounded-xl` | 24px | Section panels (pre-footer CTA band, hero trust bar, stats panel on mobile), images in cards |
+| `rounded-xl` | 24px | Section panels (hero trust bar, stats panel on mobile), images in cards |
 | `rounded-2xl` | 32px | Large feature panels from md up (stats panel) |
 | `rounded-pill` | 9999px | Badges, eyebrow pills, avatars, floating WhatsApp |
 
@@ -334,15 +334,27 @@ Implemented: `components/ui/MetricCard.tsx` (`{ value, label }`, number only; th
     | 4 | `col-start-3 row-start-2` (32px below card 3) |
     `grid-rows-[auto_1fr]` keeps row 1 hugging card 3, so the spanning cards don't push card 4 down.
 
-### 6.15 Footer
-Anatomy (footer.png): **pre-footer CTA band** → columns → bottom bar.
-- Pre-footer band (repurposed from newsletter to audit CTA): `rounded-xl bg-surface-strong p-6 md:p-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between`. Icon circle `size-14 rounded-pill bg-primary text-primary-foreground`, `text-h3` "Not sure what's holding your website back?", primary button + whatsapp button.
-- Footer: `bg-ink text-ink-muted`, `grid gap-10 sm:grid-cols-2 lg:grid-cols-4 py-section`.
-  - Col 1: logo, 2-line blurb, NAP (Name, Address, Phone: must match the Google Business profile), social icons (`size-11` hit area).
-  - Col 2 Services, Col 3 Company (About, Work, Blog, Contact), Col 4 Contact (WhatsApp, email, hours, Noida).
-  - Headings `text-h4 text-ink-foreground`, links `text-small hover:text-ink-foreground`, `py-1.5` for touch.
-- Bottom bar: `border-t border-ink-surface py-6 text-caption normal-case tracking-normal` © year, Privacy, Terms.
-- Payment logos from footer.png: **not used** (not relevant for a service agency).
+### 6.15 Footer + Audit banner
+Implemented: `components/sections/Footer.tsx` (server, rendered once in `app/layout.tsx`) + `components/sections/footer/{AuditBanner,AuditForm,FooterColumn,SocialLinks}.tsx`. Copy: `lib/content/footer.ts`; business details from `lib/site.ts` (name, phone, WhatsApp, email, hours, city/region, socials, MSME), Quick Links from `navLinks`, Services from `lib/content/services.ts`. Light footer (replaces the earlier `bg-ink` idea; footer.png) on a **full-bleed lavender band**: the background runs edge to edge, the content stays on the shared container.
+Anatomy: audit banner → 5-column grid → bottom bar.
+- Footer: `<footer class="bg-surface pt-12 pb-8">` (full-bleed band, so no top border needed) → `<Container>` (content edges = every section's). Text on `surface`: muted 6.25:1, primary 6.11:1.
+- **Audit banner** (`AuditBanner`): `flex flex-col gap-6 rounded-lg bg-linear-to-r from-surface-strong to-background p-6 md:p-8` (fades to white so it stays visible on the lavender band); **xl:** one row `xl:flex-row xl:items-center xl:justify-between xl:gap-8 xl:py-4 xl:pr-12 xl:pl-8` (≈112px tall). Below xl the form drops under the copy at full width (the one-row layout is cramped at 1024).
+  - Left: `flex items-center gap-4 md:gap-6 xl:gap-8`; icon circle `size-14 md:size-20 rounded-pill bg-primary text-primary-foreground` with lucide `Search` (`size-6 md:size-9`, stroke 2; "audit" = inspecting a site); title `<h2 class="text-h3">`; subtitle `mt-1.5 max-w-xl text-small text-muted` (muted on surface-strong ≈ 5.7:1).
+  - **AuditForm** (client; `useActionState(submitAudit)`; `noValidate`): `flex flex-col gap-3 md:flex-row md:gap-0`. Input `h-12 w-full rounded-sm border border-border-strong bg-background px-5 text-body md:flex-1 md:rounded-r-none xl:w-72 xl:flex-none` (+ sr-only label "Email address", `type="email" autocomplete="email"`). Button `buttonClasses({ size: "md" })` + `min-w-44 font-bold tracking-wide uppercase md:rounded-l-none` ("Get my audit"). Below md both are full width and fully rounded.
+  - States: pending → `Loader2` spinner + "Sending…", disabled, `aria-busy`; error → `mt-2 text-small text-error` message linked by `aria-describedby`, input `aria-invalid border-error`; success → form replaced by `text-small font-semibold text-primary` thanks line. The wrapper is `aria-live="polite"`. Hidden honeypot input `website` (`sr-only`, `aria-hidden`, `tabIndex -1`).
+  - Server action `app/actions/audit.ts`: zod (`lib/validation/audit.ts`: trim, lowercase, ≤ 254, email), honeypot → generic error, in-memory rate limit 5 / IP / 10 min, returns `{ status, ok, error? }`, never exposes internals. **Storage: none yet** (no `leads` table; logs a masked email). TODO: Lead model (needs approval).
+- **Grid** `mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:gap-x-10 lg:grid-cols-4 lg:gap-10 xl:grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr]` (ratios measured from footer.png; the last column is wider here because it holds contact details):
+  | Width | Layout |
+  |---|---|
+  | < md | brand (span 2) · Quick Links + Services · Resources · Contact (span 2) |
+  | md | brand (span 2), then 2×2 |
+  | lg | brand (span 4), then the 4 columns in one row |
+  | xl+ | 5 columns |
+  - Brand: `Logo size="sm"` (mark 40 + `text-h3` wordmark) · tagline `mt-1 text-caption font-medium normal-case tracking-normal text-muted` · description `mt-4 max-w-70 text-small text-muted` · `SocialLinks mt-4`.
+  - **SocialLinks**: only networks with a real `https://` URL in `site.socials` render (none → nothing). `<a target="_blank" rel="noopener noreferrer" aria-label="Web Merged on Instagram">` `group grid size-11 place-items-center rounded-pill` (44px hit area) holding a `size-8 rounded-pill bg-primary text-primary-foreground group-hover:bg-primary-hover motion-safe:group-hover:-translate-y-0.5` circle with a Simple Icons glyph `size-4`. LinkedIn (not in Simple Icons) shows a text "in".
+  - Contact column ("Get in Touch"): heading per §6.21; rows `md:space-y-2`, lucide icon `size-4 text-primary` + `text-small text-muted`, `gap-2.5`. WhatsApp (`wa.me`), phone (`tel:`), email (`mailto:`) are links **only once filled in**; placeholders render as plain text. Location "Noida, Uttar Pradesh, India" (no street address: service-area business), hours. Then `mt-5 text-caption … text-muted` "MSME Reg. No: …" (number `whitespace-nowrap`). Optional `payments` text chips `rounded-pill border border-border px-3 py-1 text-caption` (never payment-brand logos).
+- **Bottom bar** `mt-12 flex flex-col items-center gap-2 border-t border-border pt-6 text-center text-caption font-medium normal-case tracking-normal text-muted md:flex-row md:justify-between md:text-left`: "© {year} Web Merged. All rights reserved." (year from a `"use cache"` + `cacheLife("days")` component: Cache Components forbid a bare `new Date()`, so the page revalidates daily) · "Made with ♥ in Noida, India" (`Heart size-3.5 fill-current text-primary` `aria-hidden` + sr-only "love") · Privacy / Terms (`min-h-11 md:min-h-0`).
+- **JSON-LD** (once, in the footer): `lib/json-ld.ts` `localBusinessJsonLd()` → `ProfessionalService` with name, `areaServed` Noida, locality/region/country (no street), and url/email/telephone/sameAs **only when filled in** (placeholders are left out). TODO: `logo` once the real logo exists.
 
 ### 6.16 Floating WhatsApp button
 Always visible, bottom-right; the secondary conversion.
@@ -392,6 +404,11 @@ Implemented: `components/ui/ReviewsCarousel.tsx` (client, carousel logic only) +
 - Autoplay: **off**. `autoplayMs` prop if ever needed (plain timers, no plugin): paused on hover/focus, never under `prefers-reduced-motion`. Reduced motion also makes buttons/dots jump (`scrollTo(i, true)`) and disables the emphasis transition.
 - No JS: before Embla initialises the viewport is `no-scrollbar snap-x snap-mandatory overflow-x-auto` (slides `snap-start`), so the row still scrolls. On init it switches to `overflow-hidden`, and the viewport's native `scrollLeft` is pinned to 0 (otherwise the browser's re-snap offsets Embla's transforms).
 
+### 6.21 Footer column
+Implemented: `components/sections/footer/FooterColumn.tsx` (`{ title, links: NavLink[] }`). Exports `footerHeadingClasses` / `footerLinkClasses` (the contact column reuses them).
+- `<nav aria-label="{title}">` → `<h2 class="mb-4 text-body font-bold text-foreground">` (an h2 styled small so it doesn't compete with page headings) → `<ul class="md:space-y-1">` (≈ 25px row pitch on md+, as in footer.png).
+- Link (`next/link`): `flex w-fit min-h-11 items-center rounded-sm text-small text-muted underline-offset-4 transition-colors duration-150 hover:text-primary hover:underline md:min-h-0`. **Block-level `flex`, not `inline-flex`**: an inline link adds a line box per row and spreads the rows. 44px rows on mobile for touch.
+
 ---
 
 ## 7. Iconography & imagery
@@ -436,7 +453,7 @@ Minimal and CSS-only. No animation libraries without asking.
 9. **Pricing teaser** ("Starting at"): pre-qualifies leads, links to /pricing or service pages.
 10. **Lead form section** (bg-surface, form + "what you get in the audit" list): primary conversion.
 11. **FAQ**: handle objections + FAQPage JSON-LD.
-12. **Pre-footer CTA band + Footer**: last-chance conversion, NAP for local SEO.
+12. **Footer** (global, `app/layout.tsx`): audit banner (last-chance conversion) + link columns + contact (local SEO) + LocalBusiness JSON-LD.
 
 ### Service page (`/services/[slug]`)
 Hero (h1 = service + city, lead, audit CTA) → Problems we solve (pain points) → What's included (feature list/cards) → Process → Related case studies → Pricing (packages) → Testimonials (service-specific) → FAQ (service-specific) → Lead form → Footer. JSON-LD: Service + FAQPage + BreadcrumbList.
@@ -498,7 +515,7 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | White cards with soft violet shadow and 16–24px radius | Hard black shadows, sharp corners, heavy borders |
 | Eyebrow pill badge above headlines (Hero.png) | More than one eyebrow per section |
 | Stat cards with violet numbers (Hero.png, stats-pricing.png) | Inflated/fake numbers ("10,000+ happy clients") |
-| One dark `ink` element for emphasis (featured pricing card, footer) | Whole pages in dark mode, or several competing dark blocks |
+| One dark `ink` element for emphasis (featured pricing card) | Whole pages in dark mode, or several competing dark blocks |
 | Testimonial cards with avatar, name and stars (reviews.png) | Anonymous or invented testimonials, AI-generated faces |
 | Case study cards with industry label + result + arrow link (project.png) | Portfolio items without outcomes |
 | Pre-footer CTA band (footer.png), used for the audit | Newsletter signup as the main footer CTA; payment logos |
@@ -516,5 +533,5 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), carousel with 3 cards + side peeks and an emphasised centre card, arrows over the peeks, two-tone centred headline | Wavy section edges, handwritten "It's possible!" doodles |
 | `docs/design/project.png` | Project card anatomy (tinted image top with device mockups, category label, title, description, "View Case Study →"), the four pastel tints (→ `tint-*`), 4-column grid, header with intro on the 3rd column, centred pill "See All Projects" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
 | `docs/design/stats-pricing.png` (was OfferandPrice.png) | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
-| `docs/design/footer.png` | Lavender pre-footer CTA band with icon circle + inline action, multi-column footer (brand + blurb + socials, link columns), copyright bar | Newsletter/discount framing (→ audit CTA), payment-method logos, serif heading, light footer (→ `ink` footer) |
+| `docs/design/footer.png` | Light footer: lavender gradient banner with icon circle + joined email input/button, 5-column grid (brand + blurb + socials, 3 link columns, last column), copyright bar | Newsletter/discount framing (→ free audit), payment-method logos (→ optional text chips), serif heading, last column "We accept" (→ "Get in Touch") |
 | `docs/design/notes.md` | *Not present*. Owner supplied: name **Web Merged**, city **Noida**, focus **web apps + SEO + mobile apps**. Contact/NAP details live in `lib/site.ts` (placeholders until supplied) | n/a |
