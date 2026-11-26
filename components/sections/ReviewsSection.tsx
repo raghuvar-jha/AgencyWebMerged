@@ -1,4 +1,6 @@
 import { Underline } from "@/components/decorations/Underline";
+import { DrawLine } from "@/components/motion/DrawLine";
+import { Reveal } from "@/components/motion/Reveal";
 import { Container } from "@/components/ui/Container";
 import { ReviewCard } from "@/components/ui/ReviewCard";
 import { ReviewsCarousel } from "@/components/ui/ReviewsCarousel";
@@ -15,16 +17,19 @@ export function ReviewsSection() {
   return (
     <section id="reviews" aria-labelledby="reviews-title" className="py-section md:py-section-lg">
       <Container>
-        <header className="mx-auto max-w-2xl text-center">
+        <Reveal as="header" className="mx-auto max-w-2xl text-center">
           <p className="text-caption text-primary uppercase">{s.eyebrow}</p>
           <h2 id="reviews-title" className="mt-2 text-h2 text-foreground">
             {s.title.before} <span className="text-primary">{s.title.highlight}</span> {s.title.after}
           </h2>
-          <Underline className="mx-auto mt-2 block w-28" />
+          <DrawLine className="mx-auto mt-2 block w-28">
+            <Underline className="block w-full" />
+          </DrawLine>
           <p className="mx-auto mt-4 max-w-lg text-body-lg text-muted">{s.subtitle}</p>
-        </header>
+        </Reveal>
 
-        <div className="mt-6">
+        {/* The carousel fades up as one block; Embla's own motion is left alone. */}
+        <Reveal y={24} className="mt-6">
           {reviews.length >= MIN_FOR_CAROUSEL ? (
             <ReviewsCarousel
               labels={{
@@ -53,7 +58,7 @@ export function ReviewsSection() {
               ))}
             </ul>
           )}
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

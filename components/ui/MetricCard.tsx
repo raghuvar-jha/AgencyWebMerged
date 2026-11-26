@@ -1,3 +1,4 @@
+import { CountUp } from "@/components/motion/CountUp";
 import { cn } from "@/lib/cn";
 
 // DESIGN.md §6.14. Number-only stat card (the hero's StatCard has an icon).
@@ -9,7 +10,9 @@ export function MetricCard({ value, label, className }: { value: string; label: 
         className,
       )}
     >
-      <p className="text-h1 font-bold text-primary">{value}</p>
+      <p className="text-h1 font-bold text-primary">
+        <CountUp value={value} />
+      </p>
       <p className="max-w-32 text-body leading-snug font-medium text-muted">{label}</p>
     </div>
   );

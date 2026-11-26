@@ -11,9 +11,8 @@ export default function HomePage() {
       <Hero />
       <ProjectsSection />
       <TechStackSection />
-      <StatsSection />
-      <ReviewsSection />
       <PricingSection />
+      <ReviewsSection />
     </main>
   );
 }

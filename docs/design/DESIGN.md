@@ -206,7 +206,12 @@ Anatomy (Hero.png): logo left · links + primary CTA right. No border.
 - Logo (`components/ui/Logo.tsx`): mark `size-10 lg:size-12` + wordmark `text-h4 lg:text-title font-extrabold`, `gap-3`, links to `/`. **[PLACEHOLDER] mark until the real logo exists.**
 - Links (`lg:flex`, `gap-10`): `text-small font-medium text-muted hover:text-primary`.
 - CTA: `ButtonLink` md, `ml-12`, "Get Free Audit".
-- **Mobile (< lg):** hamburger `size-11` (`aria-expanded`, `aria-controls`, label toggles Open/Close menu). Panel: `absolute inset-x-0 top-full bg-background shadow-raised border-t`, links `block py-4 text-h4` with dividers, then full-width primary CTA (lg) + WhatsApp button (lg). Closes on Escape (focus returns to the button), outside pointer-down, link click and resize to ≥ lg; locks body scroll while open.
+- **Mobile (< lg):** hamburger `size-11` (`aria-expanded`, `aria-controls`, label toggles Open/Close menu) whose three bars **morph into an X** (outer bars `translate-y-1.75 ±rotate-45`, middle `scale-x-0 opacity-0`, 300ms `ease-out-soft`).
+  - **Frosted-glass panel**, rendered in a **portal on `<body>`** (the header's `backdrop-blur` is a backdrop root and the containing block for fixed children, see the gotcha below): `fixed inset-x-3 md:inset-x-8 top-20 z-40 rounded-xl border border-background/70 bg-background/80 backdrop-blur-xl backdrop-saturate-150 shadow-raised`, `max-h-[calc(100dvh-6rem)] overflow-y-auto`.
+  - **Scrim** below the header: `fixed inset-x-0 top-16 bottom-0 z-30 bg-ink/25 backdrop-blur-xs`; tap closes.
+  - **Motion (CSS, transform/opacity):** panel `origin-top` from `-translate-y-3 scale-97 opacity-0` to rest, scrim fades, 300ms `ease-out-soft`. Links (`<nav aria-label="Mobile">`, `divide-foreground/10`, `flex justify-between py-4 text-h4` + `ArrowRight size-4 text-subtle` that nudges on hover) and the CTA group stagger in from `-translate-y-1 opacity-0` with `delay-75 … delay-400` while opening; closing has no delays. CSS rather than GSAP so it responds instantly even before lazy GSAP loads (§8). Reduced motion: instant (global rule).
+  - The closed panel stays mounted for the exit animation but is `inert` (no focus, hidden from screen readers).
+  - Then full-width primary CTA (lg) + WhatsApp button (lg). Closes on Escape (focus returns to the button), outside pointer-down (panel and button excluded), scrim tap, link click and resize to ≥ lg; locks body scroll while open. Opening focuses the first link; Tab / Shift+Tab cycle through the toggle and menu items while open (the portal sits at the end of the DOM).
 - Gotcha: `backdrop-blur` makes the header the containing block for `position: fixed` children, so don't put full-screen overlays inside the header.
 
 ### 6.4 Hero
@@ -219,8 +224,8 @@ Anatomy (Hero.png): eyebrow pill → two-tone h1 → lead → CTA row (primary +
 - Lead: `mt-6 max-w-md text-body-lg text-muted`.
 - CTAs: `mt-10 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8`: `ButtonLink` lg + arrow, then the WhatsApp text link `h-11 text-body font-semibold text-primary` with icon.
 - Social proof: avatars `size-12 rounded-pill ring-2 ring-background -space-x-3` + 5 stars `size-4 fill-accent text-accent` + `text-small text-muted`. **[PLACEHOLDER] until real reviews exist.**
-- Media: photo slot `aspect-4/5 max-w-xs lg:max-w-sm`, with `next/image fill priority object-contain` when `hero.photo.src` is set, otherwise a dashed placeholder panel. Decorations (`HeroBlobs` `fill-primary/10`, `Squiggle`, `Sparkle`) are inline SVG, `aria-hidden`, `lg` only.
-- Stat card (`StatCard`): `rounded-lg bg-background/85 shadow-card`. Below lg: a 3-column grid under the photo, stacked compact (`p-3 sm:p-4`, icon `size-10`, number `text-h4`, label `text-caption`). At lg: `absolute right-0 top-1/2 -translate-y-1/2 w-60 flex-col gap-8`, overlapping the photo; card `flex-row gap-4 px-5 py-8`, icon circle `size-14 bg-surface-strong text-primary`, number `text-title`, label `text-small text-muted whitespace-nowrap`.
+- Media: photo slot `aspect-square max-w-xs lg:max-w-sm` (centred, `xl:mx-0`; square to match the cutout: a 4:5 slot left an empty band above the head, a big gap on mobile and a low-sitting photo on desktop) holding the founder cutout: a **static import** (`lib/founder/founderPic.webp`, 1024² transparent WebP) via `hero.photo.src`, rendered `next/image fill priority sizes="(min-width: 1024px) 384px, 320px" object-contain object-bottom mask-b-from-80%` (no crop; the cut-off shoulders fade out). `src: null` → dashed placeholder panel. Decorations (`HeroBlobs` `fill-primary/10`, `Squiggle`, `Sparkle`) are inline SVG, `aria-hidden`, `lg` only.
+- Stat card (`StatCard`): `rounded-lg bg-background/85 shadow-card`. Below **xl**: a 3-column grid under the photo, stacked compact (`p-3 sm:p-4`, icon `size-10`, number `text-h4`, label `text-caption`). At **xl** (1280+): `absolute right-0 top-1/2 -translate-y-1/2 w-60 flex-col gap-8`, overlapping the photo's right edge; card `flex-row gap-4 px-5 py-8`, icon circle `size-14 bg-surface-strong text-primary`, number `text-title`, label `text-small text-muted whitespace-nowrap`. (Not at lg: the 464px column made the cards cover the founder's face.)
 - Trust bar (`TrustBar`): `mt-14` (`pt-14` on the wrapper) then `rounded-xl bg-background/90 px-5 md:px-10 py-8 shadow-card`; title `text-body font-medium text-center`; logos `grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`, `h-8 w-auto grayscale` images, or dashed `[CLIENT LOGO n]` slots.
 
 ### 6.5 Section header
@@ -316,7 +321,7 @@ Implemented: `components/ui/Badge.tsx` (`variant`). Base `inline-flex shrink-0 i
 
 ### 6.14 Metric card + Stats panel
 Implemented: `components/ui/MetricCard.tsx` (`{ value, label }`, number only; the hero's `StatCard` has an icon) + `components/sections/StatsSection.tsx`. Data: `stats` in `lib/content/home.ts`. Decorations: `components/decorations/{Underline,RingPattern}.tsx`.
-- **Only real, verifiable numbers.** Until then values are `[X]` placeholders. No count-up animation (§8).
+- **Only real, verifiable numbers.** Until then values are `[X]` placeholders. Values render through `<CountUp>` (§8), which counts real numbers up once and leaves placeholders static.
 - MetricCard: `flex h-full flex-col items-center justify-center gap-2.5 rounded-lg bg-background px-5 py-8 text-center shadow-card`; value `<p class="text-h1 font-bold text-primary">`; label `<p class="max-w-32 text-body leading-snug font-medium text-muted">` (max 2 lines). Fixed `xl:h-45 xl:w-44` (176×180) in the stagger.
 - Section: `pt-section pb-8` → container → panel `relative overflow-hidden rounded-xl bg-surface px-6 py-10 md:rounded-2xl md:px-12 md:py-16 lg:px-20 lg:py-20`.
 - `RingPattern`: 4 concentric circles, `stroke-primary-foreground/60`, 1.5px, `size-175` centred at `left-3/5 top-1/2`, md+ only.
@@ -378,7 +383,7 @@ Implemented: `components/ui/TechTabs.tsx` (the only client code: active index + 
 - Tablist `role="tablist" aria-label` → `flex w-max gap-1`.
 - Tab `<button role="tab" aria-selected aria-controls>`: `inline-flex h-11 shrink-0 items-center gap-2 rounded-pill px-5 text-small font-semibold whitespace-nowrap transition-colors duration-150` + lucide icon `size-4` (`aria-hidden`).
   - active: `bg-background text-foreground shadow-card` · inactive: `text-muted hover:text-foreground` (`muted` on `surface-strong` ≈ 5.7:1).
-- Panel `role="tabpanel" aria-labelledby tabIndex={0}`, inactive ones `hidden`; fade in with `motion-safe:transition-opacity motion-safe:duration-150 motion-safe:starting:opacity-0` (CSS `@starting-style`, no keyframes).
+- Panel `role="tabpanel" aria-labelledby tabIndex={0}`, inactive ones `hidden`. Switching: `useSwapStagger` (§8): old cards fade out 0.15s, then the new panel's cards stagger in (0.04s, y 12). The first panel staggers on scroll; the tab bar fades up (`Reveal`).
 - Keyboard (automatic activation, roving tabindex): ←/→ move and wrap, Home/End jump; focus moves to and selects the tab, which `scrollIntoView({ inline: "nearest" })` inside the track; Tab goes on into the panel.
 - Section: `id="tech"`, full-bleed `bg-surface py-section md:py-section-lg` between Projects (white) and Stats. Centred header per §6.5 (`max-w-2xl`, eyebrow, `text-h2`, `Underline mx-auto mt-2 block w-28`, intro `mt-4 text-body text-muted`). Tabs `mt-10`, panel `mt-10`, category line `mt-8 text-center text-small text-muted`.
 
@@ -416,25 +421,93 @@ Implemented: `components/sections/footer/FooterColumn.tsx` (`{ title, links: Nav
 - **Technology logos:** `simple-icons` (CC0, pinned), imported by name only in `lib/tech-icons.ts` (server-only, so 0 KB client JS). Rendered as inline SVG in the brand's own hex: the **only** non-token colours allowed. Near-invisible brand colours (< 1.5:1 on white, e.g. JavaScript yellow) render in `text-foreground`. Logos are `aria-hidden`; the visible name is the label. Missing logos (AWS, Ahrefs): initials badge.
 - **Icons:** `lucide-react` (installed; import individual icons, tree-shaken). It has **no brand logos**. Stroke `1.75` (2 for ≤16px). Sizes: 16 (`size-4`) inline/stars, 20 (`size-5`) buttons/lists, 24 (`size-6`) card icon tiles. Colour inherits (`currentColor`). Decorative icons: `aria-hidden`. Icon-only buttons need `aria-label`. Brand icons (WhatsApp, Instagram, Facebook, LinkedIn) as small inline SVG components in `components/ui/icons/`.
 - **Imagery:** real photos of the founder, real client screenshots (device mockups as in project.png), Indian small-business context. No generic stock "handshake/laptop" photos or AI faces pretending to be clients.
-- **Aspect ratios:** hero portrait 4/5, project card image area 7/4 (case study page cover 4/3), blog cover 16/9 (also the OG image ratio ~1.91/1 generated separately), avatars 1/1.
+- **Aspect ratios:** hero founder cutout 1/1, project card image area 7/4 (case study page cover 4/3), blog cover 16/9 (also the OG image ratio ~1.91/1 generated separately), avatars 1/1.
 - **`next/image` always.** Hero image `priority` + `sizes`. Everything else lazy (default). Provide `width/height` or `fill` + sized parent to avoid CLS. AVIF/WebP via Next defaults. Source images ≤ 2400px wide.
 - Alt text: describe content and purpose ("Mobile screens of the Sharma Dental booking site"); decorative images `alt=""`.
 
 ---
 
-## 8. Motion
+## 8. Motion (GSAP)
 
-Minimal and CSS-only. No animation libraries without asking.
+One motion system for the whole site: **GSAP** (`gsap` 3.15, ScrollTrigger + SplitText + DrawSVG, free "Standard" licence), used **only** through the primitives in `components/motion/` and the tokens in `lib/motion/tokens.ts`. GSAP is the only animation library; ask before adding others. Hover/colour feedback stays CSS (table at the end).
 
+### Tokens (`lib/motion/tokens.ts`, the single source)
+| Token | Value |
+|---|---|
+| duration | fast `0.4` · base `0.8` · slow `1.2` (s) |
+| ease | out `power3.out` (default) · inOut `power2.inOut` (draws) |
+| distance | sm `16` · md `32` · lg `56` (px, desktop) |
+| stagger | `0.08` (s) |
+| start | `clamp(top 85%)` (ScrollTrigger start; clamp keeps footer triggers reachable) |
+| mobile (< 768px) | distance × `0.5`, duration × `0.75` |
+| reduced motion | content shown instantly (≤ `0.2`s fade allowed, none used) |
+| introWindowMs | `400`: navbar/hero intro plays only if JS is ready within it |
+| failsafeMs | `3000`: never-started motion un-hides everything |
+
+### Primitives (`components/motion/`, client leaves; sections stay Server Components)
+Each renders its own element (`as`, default `div`), so wrapping never adds a box. Children pass through server-rendered.
+| Primitive | Props (defaults) | Use |
+|---|---|---|
+| `<Reveal>` | `as`, `y=32`, `x=0`, `scale`, `delay=0`, `duration=0.8`, `trigger="scroll" \| "load"`, `once=true` | Section headers, panels, CTAs, blocks (`trigger="load"`: navbar) |
+| `<Stagger>` | `as`, `selector=":scope > *"`, `y=24`, `x`, `scale` (e.g. `0.97`), `stagger=0.08`, `duration`, `sequence?: number[]` (custom order) | Card grids, lists, footer columns |
+| `<SplitHeading>` | `as="h2"`, `type="lines" \| "words"`, `stagger=0.1`, `trigger`, `draw` (also draw SVG strokes inside) | Big headings below the fold (Stats h2). **Never the LCP heading, never client components inside** (it reverts to the original HTML when done) |
+| `<CountUp value>` | `value: string`, `duration=1.2` | Numbers ("350+", "98%", "₹2,50,000"). Placeholders (`[X]+`) render as-is. Final value always in an sr-only span |
+| `<Parallax>` | `as`, `speed=0.15` (±60px) | **Decorations only** (rings, blobs). md+ only. Put the positioning classes on `<Parallax>` itself |
+| `<DrawLine>` | `as="span"`, `delay=0.2`, `duration`, `trigger` | Wrap an SVG underline/doodle. Non-scaling-stroke SVGs (Underline) get a clip wipe, others real DrawSVG (`lib/motion/draw.ts`) |
+| `<IntroSequence>` | `as` + children marked `data-intro="eyebrow \| heading \| text \| cta \| proof \| media \| cards \| deco"` (+ `data-intro-draw`) | The hero's on-load timeline (≤ 1.2s). Media starts at opacity 0.9, never 0 |
+| `<HoverLift>` | `as`, `y=-8` + a `[data-hover-lift]` descendant | Card mockup lift on hover (fine pointers only) |
+| `useSwapStagger()` | → `{ leave(panel, done), enter(panel) }` | Tab/content swaps (TechTabs) |
+| `<MotionProvider>` | none, mounted once in `app/layout.tsx` | Readiness flag, debounced ScrollTrigger refresh (fonts, page height, route change), focus safety, fail-safe sweep |
+
+Examples:
+```tsx
+<Reveal as="header" className="mx-auto max-w-2xl text-center">…eyebrow, h2…
+  <DrawLine className="mx-auto mt-2 block w-28"><Underline className="block w-full" /></DrawLine>
+</Reveal>
+<Stagger as="ul" y={32} stagger={0.1} className="grid …">{cards}</Stagger>
+<Stagger sequence={featuredLast} scale={0.97} className="…">{pricingCards}</Stagger>
+<p className="text-h1 font-bold text-primary"><CountUp value={stat.value} /></p>
+<Parallax className="absolute … md:block"><RingPattern className="size-full" /></Parallax>
+```
+
+### Choreography patterns
+- **Section header:** `<Reveal as="header">` + `<DrawLine>` around the Underline. (Large below-the-fold headline: `<SplitHeading draw>`.)
+- **Card grid / list:** `<Stagger as="ul">` (y 24–32, stagger 0.05–0.1). Special order → `sequence` (Stats staircase `[0,1,3,2]`, featured pricing last). Optional `scale={0.97}`.
+- **Block that has its own motion** (Embla carousel): one `<Reveal>` around the whole block; never animate its slides on scroll.
+- **Stats:** panel `Reveal` → `SplitHeading draw` → cards `Stagger sequence` → `CountUp` values → ring `Parallax`.
+- **Hero:** `IntroSequence` on load: eyebrow → paragraph → CTAs → proof → photo (0.9→1) → stat cards from the right → squiggle draw + sparkle. **The H1 (the LCP element) is static**: animating it cost +985ms mobile LCP in Lighthouse.
+- **Navbar:** `<Reveal as="header" trigger="load" y={-12} duration={0.5}>`. **Footer:** banner `Reveal`, columns `Stagger` (y 16, 0.06), bottom bar static.
+
+### How it stays safe (built into the primitives; don't bypass)
+- **No JS / crawlers:** an inline `<head>` script (`lib/motion/boot.ts`) adds `js-motion` to `<html>`; only then does CSS (`globals.css`) pre-hide `[data-motion]` until the primitive marks it `[data-motion-ready]`. No JS → nothing is hidden.
+- **Reduced motion:** the pre-hide CSS sits inside `prefers-reduced-motion: no-preference`, and every primitive's `gsap.matchMedia` branch shows content instantly. No parallax, no counting.
+- **LCP:** GSAP is **lazy-loaded** (`lib/motion/load.ts`) after the window `load` event + idle time, and each primitive sets up in its own idle callback (one long task otherwise: TBT 54 → 204ms). `trigger="load"` content is pre-hidden only during the 400ms intro window; if JS isn't ready by then it simply shows.
+- **Transform/opacity only** (`opacity`, not `autoAlpha`: `visibility:hidden` would drop links from the Tab order). Exception: strokes/clip on small decorative SVGs. `clearProps` after every entrance, so no inline transforms stay behind (sticky/fixed still work).
+- **No layout shift:** SplitText line masks keep the heading height (checked: 240px/143px before and after). CLS 0.000 in every Lighthouse run.
+- **Once:** every entrance plays once per page load (`once: true`); returning to a page doesn't replay it. Only scrubbed decorations repeat.
+- **Keyboard:** focus inside a hidden or animating element finishes its animation instantly (or shows it if it hasn't been set up yet).
+- **Mobile:** shorter distances, faster durations. No pinning or horizontal scroll-jacking anywhere.
+- **Clean-up:** each primitive runs in a `gsap.context` scoped to its element, reverted on unmount (no stale ScrollTriggers across routes; verified).
+
+### Do / Don't
+| Do | Don't |
+|---|---|
+| Wrap the animating part of a Server Component in a primitive | Add `"use client"` to a section to animate it |
+| Use tokens and the default props | Hard-code durations/eases/distances in components |
+| Add a new primitive (+ document it here) for a new pattern | Write raw `gsap.*` calls in sections or ui components |
+| Keep motion subtle: one entrance per element | Animate the LCP element, pin sections, parallax text, animate width/height/top/left/box-shadow on scroll |
+
+### CSS motion (hover and state feedback, unchanged)
 | What | Duration | Easing |
 |---|---|---|
 | Colour/background/border hover | 150ms (`duration-150`) | default `ease-out` |
 | Card shadow lift | 200ms (`duration-200 transition-shadow`) | `ease-out-soft` |
-| Accordion chevron, mobile menu | 200ms | `ease-out-soft` |
+| Accordion chevron | 200ms | `ease-out-soft` |
+| Mobile menu: panel drop-in, scrim fade, hamburger→X, link stagger (`delay-75…400`) | 300ms | `ease-out-soft` |
 | Arrow-link nudge | 150ms (gap change) | default |
 
-- No scroll-triggered reveals, parallax, auto-playing carousels or count-up numbers (they hurt LCP/INP and accessibility).
-- `prefers-reduced-motion: reduce` disables all transitions/animations and smooth scroll globally (in `globals.css`). Spinners still indicate loading via the "Sending…" text.
+- `prefers-reduced-motion: reduce` disables all CSS transitions/animations and smooth scroll globally (in `globals.css`). Spinners still indicate loading via the "Sending…" text.
+- No auto-playing carousels.
 
 ---
 
@@ -521,7 +594,7 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | Pre-footer CTA band (footer.png), used for the audit | Newsletter signup as the main footer CTA; payment logos |
 | Amber only for stars/small highlights | Amber text on white (2.0:1) |
 | Dark text on WhatsApp green | White text on #25D366 (1.98:1) |
-| Static, fast, CSS-only motion | Decorative hand-drawn squiggles as heavy images, scroll animations, carousels (only exception: the manual Reviews carousel, §6.20) |
+| Subtle GSAP motion through the shared primitives (§8), once per element, transform/opacity only | Raw gsap calls in sections, pinning/scroll-jacking, parallax on text, animating the LCP element, heavy images as decorations, carousels (only exception: the manual Reviews carousel, §6.20) |
 
 ---
 
