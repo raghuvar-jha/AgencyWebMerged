@@ -1,4 +1,5 @@
 import { Hero } from "@/components/sections/Hero";
+import { ReviewsSection } from "@/components/sections/ReviewsSection";
 import { ProjectsSection } from "@/components/sections/ProjectsSection";
 import { PricingSection } from "@/components/sections/PricingSection";
 import { StatsSection } from "@/components/sections/StatsSection";
@@ -11,6 +12,7 @@ export default function HomePage() {
       <ProjectsSection />
       <TechStackSection />
       <StatsSection />
+      <ReviewsSection />
       <PricingSection />
     </main>
   );

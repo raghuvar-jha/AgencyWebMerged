@@ -4,6 +4,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { cn } from "@/lib/cn";
 import { featuredProjects, projectsSection } from "@/lib/content/projects";
+import { Container } from "@/components/ui/Container";
 
 // DESIGN.md §6.7. Layout:
 // < sm   one column (max-w-md, centred). No horizontal scroll row (DESIGN.md §4).
@@ -20,7 +21,7 @@ export function ProjectsSection() {
 
   return (
     <section id="work" aria-labelledby="work-title" className="scroll-mt-16 py-section md:py-section-lg lg:scroll-mt-24">
-      <div className="mx-auto w-full max-w-site px-5 md:px-8">
+      <Container>
         <header className="flex flex-col gap-6 lg:grid lg:grid-cols-4 lg:items-end lg:gap-8">
           <div className="lg:col-span-2">
             <p className="text-caption text-primary uppercase">{eyebrow}</p>
@@ -65,7 +66,7 @@ export function ProjectsSection() {
             {cta.label}
           </ButtonLink>
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

@@ -126,13 +126,13 @@ Rules: max line length ~65ch for body (`max-w-article` on long text). Never go b
 
 - **Base unit 4px** (Tailwind default spacing). **Allowed steps:** `1 2 3 4 5 6 8 10 12 14 16 20 24` (4px → 96px; half-steps `0.5 1.5 2.5` only inside small components like badges). Don't use other values.
 - **Section padding:** `py-section md:py-section-lg` (64px mobile / 96px desktop). Hero may use `pt-10 pb-section md:pt-16`.
-- **Container:** `mx-auto w-full max-w-site px-5 md:px-8` (`max-w-site` = 1280px incl. gutters → 1216px content on desktop; 20px / 32px gutters). Navbar only: `max-w-nav` (1392px → 1328px content). Long-form text: `max-w-article`.
+- **Container:** always the shared `<Container>` (`components/ui/Container.tsx`; classes also exported as `containerClasses`) = `mx-auto w-full max-w-site px-5 md:px-8` (`max-w-site` = 1280px incl. gutters → 1216px content on desktop; 20px / 32px gutters). **Never retype the string.** Panels (Stats) and carousels (Reviews) sit directly on the container's content box with no margin, so their edges line up at every width (1440: x 112–1328 · 1024: 32–992 · 768: 32–736 · 375: 20–355). Navbar only: `max-w-nav` (1392px → 1328px content). Long-form text: `max-w-article`.
 - **Breakpoints** (Tailwind defaults + `xs`): `xs` 360 (token `--breakpoint-xs`, for small-phone grids only, e.g. tech cards 2 → 3 columns), `sm` 640, `md` 768, `lg` 1024, `xl` 1280. Design order: base (360) → `md` → `lg`.
 - **Grids:**
   - Card grids: `grid gap-5 sm:grid-cols-2 lg:grid-cols-3` (services, testimonials, pricing). Project cards: four per row at lg (project.png, see §6.7).
   - Hero / split sections: `grid items-center gap-10 lg:grid-cols-2`. Text first on mobile, media second.
   - Gaps: `gap-5` inside grids, `gap-3` within card internals, `space-y-4` for text stacks, `mt-10 md:mt-12` between a section header and its content.
-- Stack vertically below `md`. No page-level horizontal scroll ever; carousels are not used (they hide content and add JS). One exception: a tab bar that doesn't fit may scroll sideways **inside its own track** (`no-scrollbar` utility, §6.18).
+- Stack vertically below `md`. No page-level horizontal scroll ever. Carousels are not used (they hide content and add JS), with **one approved exception: the Reviews carousel** (§6.20: manual, no autoplay by default, every card in the HTML, static row when < 4 reviews). A tab bar that doesn't fit may also scroll sideways **inside its own track** (`no-scrollbar` utility, §6.18).
 
 ---
 
@@ -254,13 +254,14 @@ Anatomy (project.png): tinted image area with device mockup → category → tit
   - lg+: `grid-cols-8 gap-8`, cards `col-span-2` (four per row, ~280×336 at 1440). With 1–3 cards the first gets `col-start-4/3/2` so the row stays centred.
 - CTA `mt-12`, centred: `ButtonLink size="sm" shape="pill" trailingIcon="arrow"` "See All Projects" → `/work`. The section's only CTA.
 
-### 6.8 Testimonial
-Anatomy (reviews.png): avatar + name/role → 5 stars → quote.
-`flex flex-col gap-4 rounded-lg bg-background p-6 shadow-card` (on ink: `bg-ink-surface`, text `ink-foreground`, muted `ink-muted`).
-- Header `flex items-center gap-3`: avatar `size-12 rounded-pill object-cover`, name `text-small font-semibold`, role/business + city `text-caption text-muted normal-case tracking-normal`.
-- Stars: `Star` ×5 `size-4 fill-accent text-accent`, with `aria-label="Rated 5 out of 5"` on the wrapper.
-- Quote: `<blockquote class="text-body text-foreground">`.
-- Section variant: full-bleed `bg-primary` band (reviews.png). Then headings use `text-primary-foreground` and cards stay white. Or `bg-ink`. Real reviews only; link to the Google Business profile if available.
+### 6.8 Review card (testimonial)
+Implemented: `components/ui/ReviewCard.tsx` (server-safe). Data: `lib/content/reviews.ts` (`Review { id, name, role, quote, rating: number | null, avatar?, source? }`). **Placeholders only; never invent reviews, names, photos or ratings; no review structured data until reviews are real.**
+Anatomy (reviews.png): avatar + name/role → quote → stars (+ "Google review").
+- `<figure class="flex h-full flex-col rounded-lg border border-border bg-background p-6 shadow-card">` (equal heights via `h-full`).
+- Top row `flex items-center gap-3`: avatar `size-12 rounded-pill object-cover` (`next/image` 48×48), or initials `grid size-12 place-items-center rounded-pill bg-surface-strong text-small font-bold text-primary` (`aria-hidden`). `<figcaption class="min-w-0">`: name `block text-body font-bold text-primary`, role "Owner, [Business]" `block text-caption font-medium normal-case tracking-normal text-muted`.
+- Quote `<blockquote class="mt-4 line-clamp-4 text-small text-muted">` (full text stays in the DOM).
+- Footer (only if rated or `source: "google"`) `mt-auto flex items-center justify-between gap-3 pt-4`: `StarRating` (§6.19) + "Google review" `text-caption font-medium normal-case tracking-normal text-muted`.
+- In the carousel the active slide adds `lg:group-data-active/slide:shadow-raised` (300ms, `motion-safe`).
 
 ### 6.9 Pricing card + Pricing section
 Implemented: `components/ui/PricingCard.tsx` (`variant: "default" | "featured"`, defaults from `plan.featured`) + `components/sections/PricingSection.tsx`. Data: `pricing` in `lib/content/home.ts` (`PricingPlan` type).
@@ -368,6 +369,28 @@ Implemented: `components/ui/TechTabs.tsx` (the only client code: active index + 
 - Panel `role="tabpanel" aria-labelledby tabIndex={0}`, inactive ones `hidden`; fade in with `motion-safe:transition-opacity motion-safe:duration-150 motion-safe:starting:opacity-0` (CSS `@starting-style`, no keyframes).
 - Keyboard (automatic activation, roving tabindex): ←/→ move and wrap, Home/End jump; focus moves to and selects the tab, which `scrollIntoView({ inline: "nearest" })` inside the track; Tab goes on into the panel.
 - Section: `id="tech"`, full-bleed `bg-surface py-section md:py-section-lg` between Projects (white) and Stats. Centred header per §6.5 (`max-w-2xl`, eyebrow, `text-h2`, `Underline mx-auto mt-2 block w-28`, intro `mt-4 text-body text-muted`). Tabs `mt-10`, panel `mt-10`, category line `mt-8 text-center text-small text-muted`.
+
+### 6.19 Star rating
+Implemented: `components/ui/StarRating.tsx` (`rating`, `max = 5`). `flex items-center gap-1`; lucide `Star size-4 strokeWidth 2`, filled `fill-accent text-accent`, empty `fill-subtle text-subtle`; all stars `aria-hidden` + `<span class="sr-only">Rated N out of 5</span>`. Render nothing (not 0 stars) when the rating is unknown (`null`).
+
+### 6.20 Reviews carousel + Reviews section ("What Clients Say")
+Implemented: `components/ui/ReviewsCarousel.tsx` (client, carousel logic only) + `components/sections/ReviewsSection.tsx` (server). Library: **`embla-carousel-react` 8.6.0** (pinned, ~7KB gz; approved exception to "no carousels", §4).
+- Section: `id="reviews"`, white, right after Stats, `py-section md:py-section-lg`, inside `<Container>` so the viewport's edges equal the Stats panel's edges. Header per §6.5, centred: eyebrow "Testimonials", `text-h2` with the middle word `text-primary` ("What **Clients** Say"), `Underline mx-auto mt-2 block w-28`, subtitle `mx-auto mt-4 max-w-lg text-body-lg text-muted`. Carousel `mt-6`.
+- **≥ 4 reviews → carousel; 1–3 → static** `<ul class="flex flex-col items-center gap-6 py-6 md:flex-row md:items-stretch md:justify-center lg:gap-8">`, items `w-full max-w-sm md:flex-1` (no client JS).
+- Region `role="region" aria-roledescription="carousel" aria-label="Client reviews"`; ←/→ keys move while focus is inside. Slides `role="group" aria-roledescription="slide" aria-label="N of M"`. An sr-only `aria-live="polite" aria-atomic` line announces "Review N of M" (`off` while autoplay runs).
+- Embla options: `loop: true`, `align: "start"`, `containScroll: false`, `breakpoints: { "(min-width: 1024px)": { align: "center" } }`.
+- Viewport (the Embla root) = the container content box, `overflow-hidden` (nothing past the edges). Track `flex touch-pan-y pt-6 pb-12` (room for the raised shadow). Fade: `mask-r-from-92% md:mask-r-from-95% lg:mask-x-from-95%` (only the peeks fade; arrows sit outside the masked element).
+- Slides: `relative min-w-0 shrink-0 basis-7/8 md:basis-4/9 lg:basis-1/4` + spacing as **right margin** `mr-4 md:mr-6 lg:mr-8 xl:mr-12` (Embla reads the last slide's margin for the loop gap; CSS `gap` would lose it).
+  | Width | Visible | Peek | Arrows |
+  |---|---|---|---|
+  | lg+ | 3 cards, centre card active | 56px each side (304px cards, 48px gaps at 1216) | 44px over the peeks, 8px inside the edges |
+  | md–lg | 2 cards (start aligned) | ~30px right | beside the dots |
+  | < md | 1 card (87.5%) | ~26px right | hidden (swipe) |
+- Centre emphasis (lg+): active slide `lg:z-10 lg:scale-106` + card `shadow-raised`, `motion-safe:transition-transform duration-300 ease-out`. Side cards stay 100% opacity (as in reviews.png).
+- Arrows: `<button aria-label="Previous review"/"Next review">` `grid size-11 place-items-center rounded-pill bg-background text-foreground shadow-card hover:bg-surface-strong hover:text-primary` + `ChevronLeft/Right size-5`.
+- Dots (all widths): `<button aria-label="Go to review N" aria-current>` `grid h-11 w-6 place-items-center` (24×44 target) holding `h-2 rounded-pill`, active `w-6 bg-primary`, others `w-2 bg-border-strong`.
+- Autoplay: **off**. `autoplayMs` prop if ever needed (plain timers, no plugin): paused on hover/focus, never under `prefers-reduced-motion`. Reduced motion also makes buttons/dots jump (`scrollTo(i, true)`) and disables the emphasis transition.
+- No JS: before Embla initialises the viewport is `no-scrollbar snap-x snap-mandatory overflow-x-auto` (slides `snap-start`), so the row still scrolls. On init it switches to `overflow-hidden`, and the viewport's native `scrollLeft` is pinned to 0 (otherwise the browser's re-snap offsets Embla's transforms).
 
 ---
 
@@ -481,7 +504,7 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | Pre-footer CTA band (footer.png), used for the audit | Newsletter signup as the main footer CTA; payment logos |
 | Amber only for stars/small highlights | Amber text on white (2.0:1) |
 | Dark text on WhatsApp green | White text on #25D366 (1.98:1) |
-| Static, fast, CSS-only motion | Decorative hand-drawn squiggles as heavy images, scroll animations, carousels |
+| Static, fast, CSS-only motion | Decorative hand-drawn squiggles as heavy images, scroll animations, carousels (only exception: the manual Reviews carousel, §6.20) |
 
 ---
 
@@ -490,7 +513,7 @@ h1 "Let's grow your business" + short lead → two columns: Lead form (left/top 
 | File | What was taken | What was rejected |
 |---|---|---|
 | `docs/design/Hero.png` | Violet primary + lavender bg, geometric sans (→ Plus Jakarta Sans), two-tone bold headline, eyebrow pill badge, primary CTA + ghost secondary, avatar-stack + stars social proof, floating stat cards with icon chips, white sticky navbar with CTA on the right, "trusted by" logo strip | Decorative scribble/sparkle graphics, purple blob behind the photo (heavy, distracting) |
-| `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), 3-up row, full-bleed violet band variant | Wavy section edges, handwritten "It's possible!" doodles |
+| `docs/design/reviews.png` | Testimonial card anatomy (avatar, name, amber stars, quote), carousel with 3 cards + side peeks and an emphasised centre card, arrows over the peeks, two-tone centred headline | Wavy section edges, handwritten "It's possible!" doodles |
 | `docs/design/project.png` | Project card anatomy (tinted image top with device mockups, category label, title, description, "View Case Study →"), the four pastel tints (→ `tint-*`), 4-column grid, header with intro on the 3rd column, centred pill "See All Projects" button below | Cream background, hot-pink CTA (#E8336D), serif "Selected Work" heading, script-like underline |
 | `docs/design/stats-pricing.png` (was OfferandPrice.png) | Stats block (headline + white stat cards with violet numbers on lavender), 3-tier pricing with dark navy featured card (→ `ink` palette) + "Most popular" badge, check-list features, full-width CTAs, pill CTA with icon | Fake-scale stats copy ("10,000+ … companies"), $/month SaaS pricing model (→ ₹ "starting at" project pricing) |
 | `docs/design/footer.png` | Lavender pre-footer CTA band with icon circle + inline action, multi-column footer (brand + blurb + socials, link columns), copyright bar | Newsletter/discount framing (→ audit CTA), payment-method logos, serif heading, light footer (→ `ink` footer) |
