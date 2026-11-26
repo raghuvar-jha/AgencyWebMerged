@@ -1,9 +1,10 @@
 // All home-page copy lives here. Components only render it.
+import type { StaticImageData } from "next/image";
+import founderPhoto from "@/lib/founder/founderPic.webp";
 // [PLACEHOLDER] values must be replaced with real data before launch (see DESIGN.md §10).
 //
 // PLACEHOLDERS TO REPLACE (search for "[" in this file):
 // - hero.socialProof.text / ratingLabel  real client count + Google rating
-// - hero.photo                           founder photo (src + alt)
 // - heroStats[].value                    projects, businesses served, years
 // - trustBar.logos                       real client logos (src + name)
 // - stats.title.line1                    "[X]+ Happy" → real number of businesses
@@ -57,9 +58,9 @@ export const hero = {
     avatarCount: 4,
   },
   photo: {
-    /** Founder photo, ideally a transparent PNG cutout (4:5). null = placeholder panel. */
-    src: null as string | null,
-    alt: "[PLACEHOLDER: Founder of Web Merged]",
+    /** Founder photo: transparent cutout (static import → real size, optimised WebP/AVIF). null = placeholder panel. */
+    src: founderPhoto as StaticImageData | null,
+    alt: "Founder of Web Merged",
     placeholder: "[PLACEHOLDER: founder photo, transparent PNG, 4:5]",
   },
 };

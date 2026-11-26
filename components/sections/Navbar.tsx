@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Reveal } from "@/components/motion/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { MobileMenu } from "@/components/sections/MobileMenu";
@@ -7,7 +8,8 @@ import { whatsappLink } from "@/lib/site";
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 bg-surface/70 backdrop-blur-md">
+    // Fades down 12px on load (intro window only); Reveal renders the <header> itself so sticky still works.
+    <Reveal as="header" trigger="load" y={-12} duration={0.5} className="sticky top-0 z-40 bg-surface/70 backdrop-blur-md">
       <nav
         aria-label="Main"
         className="mx-auto flex h-16 w-full max-w-nav items-center justify-between px-5 md:px-8 lg:h-24"
@@ -38,6 +40,6 @@ export function Navbar() {
           whatsapp={{ label: hero.whatsappCta.label, href: whatsappLink(hero.whatsappCta.message) }}
         />
       </nav>
-    </header>
+    </Reveal>
   );
 }

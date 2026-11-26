@@ -131,6 +131,22 @@
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/*
+ * Motion pre-hide (DESIGN.md → Motion (GSAP)). Only when JS is on (.js-motion, set by the inline
+ * boot script) and the visitor hasn't asked for reduced motion. A primitive marks its element
+ * [data-motion-ready] once GSAP has set the start state, so this never causes a flash.
+ * No JS / crawlers / reduced motion: nothing here applies, all content is visible.
+ * "load" (navbar, hero) is only hidden during the short intro window (.motion-intro), so the
+ * LCP element never waits on JS; the hero media is never hidden (it starts at opacity 0.9).
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion [data-motion="scroll"]:not([data-motion-ready]),
+  .js-motion.motion-intro [data-motion="load"]:not([data-motion-ready]),
+  .js-motion.motion-intro [data-intro]:not([data-intro="media"]):not([data-motion-ready]) {
+    opacity: 0;
+  }
+}
+
 /* Hide a scrollbar but keep the element scrollable (touch, trackpad, keyboard). Tech tab bar. */
 @utility no-scrollbar {
   scrollbar-width: none;

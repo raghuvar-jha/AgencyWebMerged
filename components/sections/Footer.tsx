@@ -1,6 +1,8 @@
 import { Clock, Heart, Mail, MapPin, MessageCircle, Phone, type LucideIcon } from "lucide-react";
 import { cacheLife } from "next/cache";
 import Link from "next/link";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 import { AuditBanner } from "@/components/sections/footer/AuditBanner";
 import { FooterColumn, footerHeadingClasses, footerLinkClasses } from "@/components/sections/footer/FooterColumn";
 import { SocialLinks } from "@/components/sections/footer/SocialLinks";
@@ -42,9 +44,12 @@ export function Footer() {
     <footer className="bg-surface pt-12 pb-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(localBusinessJsonLd()) }} />
       <Container>
-        <AuditBanner />
+        <Reveal y={24}>
+          <AuditBanner />
+        </Reveal>
 
-        <div data-footer-grid className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:gap-x-10 lg:grid-cols-4 lg:gap-10 xl:grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr]">
+        {/* Columns stagger lightly; the bottom bar doesn't animate. */}
+        <Stagger y={16} stagger={0.06} data-footer-grid className="mt-10 grid grid-cols-2 gap-x-6 gap-y-8 md:gap-x-10 lg:grid-cols-4 lg:gap-10 xl:grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr]">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-4 xl:col-span-1">
             <Logo size="sm" />
@@ -104,7 +109,7 @@ export function Footer() {
               </div>
             )}
           </div>
-        </div>
+        </Stagger>
 
         {/* Bottom bar */}
         <div data-footer-bottom className="mt-12 flex flex-col items-center gap-2 border-t border-border pt-6 text-center text-caption font-medium tracking-normal text-muted normal-case md:flex-row md:justify-between md:text-left">

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Footer } from "@/components/sections/Footer";
 import { Navbar } from "@/components/sections/Navbar";
+import { motionBootScript } from "@/lib/motion/boot";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -22,7 +25,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN" className={`${jakarta.variable} h-full antialiased`}>
+    // suppressHydrationWarning: the boot script adds motion classes to <html> before hydration.
+    <html lang="en-IN" className={`${jakarta.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        {/* Motion boot: must run before first paint (see lib/motion/boot.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: motionBootScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background font-sans text-body text-foreground">
         <a
           href="#main"
@@ -33,6 +41,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Navbar />
         {children}
         <Footer />
+        <Suspense fallback={null}>
+          <MotionProvider />
+        </Suspense>
       </body>
     </html>
   );

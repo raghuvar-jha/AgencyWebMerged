@@ -1,5 +1,8 @@
 import { Globe, Server, ShoppingCart, Smartphone, TrendingUp, type LucideIcon } from "lucide-react";
 import { Underline } from "@/components/decorations/Underline";
+import { DrawLine } from "@/components/motion/DrawLine";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 import { TechCard } from "@/components/ui/TechCard";
 import { TechTabs } from "@/components/ui/TechTabs";
 import { techCategories, techSection, type TechTabIcon } from "@/lib/content/tech";
@@ -19,7 +22,9 @@ const tabIcons: Record<TechTabIcon, LucideIcon> = {
 export function TechStackSection() {
   const { eyebrow, title, intro, tablistLabel } = techSection;
 
-  const tabs = techCategories.map((category) => {
+  const tabs = techCategories.map((category, index) => {
+    // Only the first (initially visible) panel staggers on scroll; tab changes animate in TechTabs.
+    const List = index === 0 ? Stagger : "ul";
     const Icon = tabIcons[category.icon];
     return {
       id: category.id,
@@ -29,11 +34,14 @@ export function TechStackSection() {
         <>
           {/* Gutter pattern: each <li> has px-2.5 and the list pulls back -mx-2.5, giving a 20px gap.
               flex-wrap + justify-center centres a short last row. */}
-          <ul className="-mx-2.5 flex flex-wrap justify-center gap-y-5">
+          <List
+            {...(index === 0 && { as: "ul" as const, y: 24, stagger: 0.05 })}
+            className="-mx-2.5 flex flex-wrap justify-center gap-y-5"
+          >
             {category.items.map((item) => (
               <TechCard key={`${category.id}-${item.name}`} item={item} />
             ))}
-          </ul>
+          </List>
           <p className="mt-8 text-center text-small text-muted">{category.description}</p>
         </>
       ),
@@ -43,14 +51,16 @@ export function TechStackSection() {
   return (
     <section id="tech" aria-labelledby="tech-title" className="bg-surface py-section md:py-section-lg">
       <Container>
-        <header className="mx-auto max-w-2xl text-center">
+        <Reveal as="header" className="mx-auto max-w-2xl text-center">
           <p className="text-caption text-primary uppercase">{eyebrow}</p>
           <h2 id="tech-title" className="mt-2 text-h2 text-foreground">
             {title}
           </h2>
-          <Underline className="mx-auto mt-2 block w-28" />
+          <DrawLine className="mx-auto mt-2 block w-28">
+            <Underline className="block w-full" />
+          </DrawLine>
           <p className="mt-4 text-body text-muted">{intro}</p>
-        </header>
+        </Reveal>
 
         <TechTabs label={tablistLabel} tabs={tabs} />
       </Container>

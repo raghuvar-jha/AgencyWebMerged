@@ -36,7 +36,7 @@ export function ProjectCard({ project, linkLabel, placeholderLabel, className }:
     >
       <div className={cn("relative aspect-7/4 overflow-hidden", tints[project.tint])}>
         {project.image ? (
-          <div className="absolute inset-x-0 bottom-0 h-9/10">
+          <div data-hover-lift className="absolute inset-x-0 bottom-0 h-9/10">
             <Image
               src={project.image.src}
               alt={project.image.alt}
@@ -78,7 +78,7 @@ export function ProjectCard({ project, linkLabel, placeholderLabel, className }:
 /** Two overlapping phone outlines until a real mockup image exists. */
 function MockupPlaceholder({ label }: { label: string }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div data-hover-lift className="absolute inset-0 flex items-center justify-center">
       <span className="sr-only">{label}</span>
       <span aria-hidden="true" className="h-5/6 aspect-1/2 rounded-md border-2 border-foreground/10 bg-background" />
       <span

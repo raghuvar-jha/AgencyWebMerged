@@ -13,6 +13,7 @@ Marketing site for **Web Merged**, a solo web agency in **Noida**, India, sellin
 - ESLint **^9** + eslint-config-next 16.4.6 (flat config, `eslint.config.mjs`)
 - PostgreSQL via **Prisma 7.10.1** (`prisma`, `@prisma/client`, `@prisma/adapter-pg`) + **pg 8.23.1** driver. Pinned to 7.x on purpose: npm's `prisma@latest` tag is an 8.0 RC
 - **zod 4.6.7** (validation), **lucide-react 1.80.0** (icons), dotenv (Prisma CLI env loading)
+- **gsap 3.15.1** (motion: ScrollTrigger, SplitText, DrawSVG; lazy-loaded via `lib/motion/load.ts`), **embla-carousel-react 8.6.0** (Reviews carousel), **simple-icons 16.38.1** (tech/social logos)
 - Fonts: Plus Jakarta Sans via `next/font/google` (`--font-jakarta` → `font-sans`)
 
 This is Next 16: APIs differ from older training data. Check `node_modules/next/dist/docs/` before using an API you're unsure of.
@@ -63,6 +64,7 @@ Create folders only when first needed.
 - **Lead form = server action** (`app/actions/`) + `useActionState`; return typed `{ ok, errors }`. Include a honeypot and basic rate limiting. Never trust client data.
 - Site-wide constants (name, phone, WhatsApp number, address, socials) live in one config file. Never duplicate them in pages.
 - Accessibility per DESIGN.md §11: labels, focus rings, 44px targets, one h1.
+- Motion: Every new component or section must include scroll/entrance animation using the shared GSAP primitives in components/motion/ (Reveal, Stagger, SplitHeading, CountUp, Parallax) and the tokens in lib/motion/tokens.ts, following DESIGN.md → Motion. Never write raw gsap calls inside section components; if a new pattern is needed, add a new primitive to components/motion/ and document it in DESIGN.md. Always respect prefers-reduced-motion, never hide content from no-JS users, never animate the LCP element from opacity 0, and animate only transform/opacity.
 
 ## Database
 - PostgreSQL + **Prisma 7** using the `prisma-client` generator and the `@prisma/adapter-pg` driver adapter. Import the client only as `import { db } from "@/lib/db"`, and only in server code (server actions, route handlers, Server Components).
@@ -81,7 +83,7 @@ Create folders only when first needed.
 
 ## Performance rules
 - Always `next/image` (with `sizes`; `priority` only on the LCP image) and `next/font`.
-- No heavy animation/UI libraries (framer-motion, GSAP, carousels, component kits) **without asking**. CSS transitions only.
+- GSAP is the only animation library; ask before adding others. No heavy UI/component kits or carousel libraries without asking.
 - Keep client JS small: target < 120KB first-load JS per route; LCP < 2.5s; Lighthouse ≥ 90.
 - Third-party scripts (analytics, pixels) via `next/script` with `afterInteractive`/`lazyOnload`.
 

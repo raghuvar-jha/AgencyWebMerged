@@ -1,5 +1,9 @@
 import { Heart } from "lucide-react";
 import { Underline } from "@/components/decorations/Underline";
+import { DrawLine } from "@/components/motion/DrawLine";
+import { HoverLift } from "@/components/motion/HoverLift";
+import { Reveal } from "@/components/motion/Reveal";
+import { Stagger } from "@/components/motion/Stagger";
 import { ButtonLink } from "@/components/ui/Button";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { cn } from "@/lib/cn";
@@ -22,13 +26,15 @@ export function ProjectsSection() {
   return (
     <section id="work" aria-labelledby="work-title" className="scroll-mt-16 py-section md:py-section-lg lg:scroll-mt-24">
       <Container>
-        <header className="flex flex-col gap-6 lg:grid lg:grid-cols-4 lg:items-end lg:gap-8">
+        <Reveal as="header" className="flex flex-col gap-6 lg:grid lg:grid-cols-4 lg:items-end lg:gap-8">
           <div className="lg:col-span-2">
             <p className="text-caption text-primary uppercase">{eyebrow}</p>
             <h2 id="work-title" className="mt-2 text-h2 text-foreground">
               {title}
             </h2>
-            <Underline className="mt-2 block w-28" />
+            <DrawLine className="mt-2 block w-28">
+              <Underline className="block w-full" />
+            </DrawLine>
           </div>
           <p className="max-w-md text-body text-muted lg:col-span-2">
             <span className="block">{intro.line1}</span>
@@ -41,10 +47,10 @@ export function ProjectsSection() {
             />{" "}
             {intro.line2End}
           </p>
-        </header>
+        </Reveal>
 
         {count > 0 && (
-          <ul className="mx-auto mt-10 grid max-w-md gap-6 sm:max-w-none sm:grid-cols-4 lg:grid-cols-8 lg:gap-8">
+          <Stagger as="ul" y={32} stagger={0.1} className="mx-auto mt-10 grid max-w-md gap-6 sm:max-w-none sm:grid-cols-4 lg:grid-cols-8 lg:gap-8">
             {featuredProjects.map((project, i) => (
               <li
                 key={project.slug}
@@ -55,17 +61,19 @@ export function ProjectsSection() {
                   i === 0 && count < 4 && lgStart[count],
                 )}
               >
-                <ProjectCard project={project} linkLabel={cardLinkLabel} placeholderLabel={mockupPlaceholder} />
+                <HoverLift className="h-full">
+                  <ProjectCard project={project} linkLabel={cardLinkLabel} placeholderLabel={mockupPlaceholder} />
+                </HoverLift>
               </li>
             ))}
-          </ul>
+          </Stagger>
         )}
 
-        <div className="mt-12 flex justify-center">
+        <Reveal className="mt-12 flex justify-center">
           <ButtonLink href={cta.href} size="sm" shape="pill" trailingIcon="arrow">
             {cta.label}
           </ButtonLink>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );
